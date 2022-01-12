@@ -1,6 +1,8 @@
 #Project path
 /[Ee]clipse/
 /[Bb]uild/
+/.gradle/
+/.settings/
 
 
 # Compiled class file
