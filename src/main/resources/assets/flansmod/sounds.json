@@ -1,0 +1,38 @@
+{
+    "Lock": {
+        "category" : "player",
+        "sounds" : [ "flansmod:vehicule/lock" ]
+    },
+    "Unlock": {
+        "category" : "player",
+        "sounds" : [ "flansmod:vehicule/unlock" ]
+    },
+    "Klaxon": {
+        "category" : "player",
+        "sounds" : [ "flansmod:vehicule/hornVehicle3" ]
+    },
+    "Siren": {
+        "category" : "player",
+        "sounds" : [ "flansmod:vehicule/siren" ]
+    },
+    "TruckStart": {
+        "category" : "player",
+        "sounds" : [ "flansmod:vehicule/TruckStart" ]
+    },    
+    "nail.eject": {
+        "category" : "master",
+        "sounds" : [ "flansmod:items/bicheone" ]
+    },
+    "nail.eject.1": {
+        "category" : "master",
+        "sounds" : [ "flansmod:items/bichetwo" ]
+    },       
+    "nail.eject.2": {
+        "category" : "master",
+        "sounds" : [ "flansmod:items/bichethre" ]   
+    },       
+    "nail.eject.3": {
+        "category" : "master",
+        "sounds" : [ "flansmod:items/bichethre" ]           
+    }
+}

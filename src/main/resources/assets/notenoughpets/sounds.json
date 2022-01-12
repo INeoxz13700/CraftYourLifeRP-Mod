@@ -1,0 +1,218 @@
+{
+  "mob.cat.beg":{
+    "category": "neutral",
+    "sounds": [
+      {
+       "name": "minecraft:mob/cat/beg1",
+	   "volume": 0.7
+      },
+      {
+       "name": "minecraft:mob/cat/beg2",
+	   "volume": 0.7
+      },
+      {
+       "name": "minecraft:mob/cat/beg3",
+	   "volume": 0.7
+      }
+    ]
+  },
+  "mob.cat.eat":{
+    "category": "neutral",
+    "sounds": [
+      {
+       "name": "minecraft:mob/cat/eat1",
+	   "volume": 1
+      },
+      {
+       "name": "minecraft:mob/cat/eat2",
+	   "volume": 1
+      }
+    ]
+  },
+  "mob.cat.stray.idle":{
+    "category": "neutral",
+    "sounds": [
+      {
+       "name": "minecraft:mob/cat/stray/idle1",
+	   "volume": 0.35
+      },
+      {
+       "name": "minecraft:mob/cat/stray/idle2",
+	   "volume": 0.35
+      },
+      {
+       "name": "minecraft:mob/cat/stray/idle3",
+	   "volume": 0.35
+      },
+      {
+       "name": "minecraft:mob/cat/stray/idle4",
+	   "volume": 0.35
+      }
+    ],
+    "subtitle": "subtitles.entity.cat.ambient"
+  },
+  "mob.cat.ocelot.idle":{
+    "category": "neutral",
+    "sounds": [
+      {
+       "name": "minecraft:mob/cat/ocelot/idle1",
+	   "volume": 0.3
+      },
+      {
+       "name": "minecraft:mob/cat/ocelot/idle2",
+	   "volume": 0.3
+      },
+      {
+       "name": "minecraft:mob/cat/ocelot/idle3",
+	   "volume": 0.35
+      },
+      {
+       "name": "minecraft:mob/cat/ocelot/idle4",
+	   "volume": 0.45
+      }
+    ],
+    "subtitle": "subtitles.entity.cat.ambient"
+  },
+  "mob.cat.ocelot.death":{
+    "category": "neutral",
+    "sounds": [
+      {
+       "name": "minecraft:mob/cat/ocelot/death1",
+	   "volume": 0.45,
+       "pitch": 1
+      },
+      {
+       "name": "minecraft:mob/cat/ocelot/death2",
+       "volume": 0.45,
+       "pitch": 1
+      },
+      {
+       "name": "minecraft:mob/cat/ocelot/death3",
+       "volume": 0.45,
+       "pitch": 1
+      }
+    ],
+	"subtitle": "subtitles.entity.cat.death"
+  },
+  "entity.cat.hiss": {
+    "sounds": [
+      {
+        "name": "minecraft:mob/cat/hiss1",
+        "volume": 0.4
+      },
+      {
+        "name": "minecraft:mob/cat/hiss2",
+        "volume": 0.4
+      },
+      {
+        "name": "minecraft:mob/cat/hiss3",
+        "volume": 0.4
+      }
+    ],
+    "subtitle": "subtitles.entity.cat.hurt"
+  },
+  
+  
+  
+  
+  
+  "entity.parrot.ambient": {
+    "sounds": [
+      {
+        "name": "minecraft:mob/parrot/idle1",
+        "volume": 0.7
+      },
+      {
+        "name": "minecraft:mob/parrot/idle2",
+        "volume": 0.7
+      },
+      {
+        "name": "minecraft:mob/parrot/idle3",
+        "volume": 0.7
+      },
+      {
+        "name": "minecraft:mob/parrot/idle4",
+        "volume": 0.7
+      },
+      {
+        "name": "minecraft:mob/parrot/idle5",
+        "volume": 0.7
+      },
+      {
+        "name": "minecraft:mob/parrot/idle6",
+        "volume": 0.7
+      }
+    ],
+    "subtitle": "subtitles.entity.parrot.ambient"
+  },
+  "entity.parrot.death": {
+    "sounds": [
+      {
+        "name": "minecraft:mob/parrot/death1",
+        "pitch": 0.9
+      },
+      {
+        "name": "minecraft:mob/parrot/death2",
+        "pitch": 0.9
+      },
+      {
+        "name": "minecraft:mob/parrot/death3",
+        "pitch": 0.9
+      },
+      {
+        "name": "minecraft:mob/parrot/death4",
+        "pitch": 0.7
+      }
+    ],
+    "subtitle": "subtitles.entity.parrot.death"
+  },
+  "entity.parrot.eat":{
+    "category": "neutral",
+    "sounds": [
+       "minecraft:mob/parrot/eat1",
+       "minecraft:mob/parrot/eat2",
+       "minecraft:mob/parrot/eat3"
+    ],
+    "subtitle": "subtitles.entity.parrot.eats"
+  },
+  "entity.parrot.fly":{
+    "category": "neutral",
+    "sounds": [
+       "minecraft:mob/parrot/fly1",
+       "minecraft:mob/parrot/fly2",
+       "minecraft:mob/parrot/fly3",
+       "minecraft:mob/parrot/fly4",
+       "minecraft:mob/parrot/fly5",
+       "minecraft:mob/parrot/fly6",
+       "minecraft:mob/parrot/fly7",
+       "minecraft:mob/parrot/fly8"
+    ]
+  },
+  "entity.parrot.hurt": {
+    "sounds": [
+      {
+        "name": "minecraft:mob/parrot/hurt1",
+        "pitch": 0.8
+      },
+      {
+        "name": "minecraft:mob/parrot/hurt2",
+        "pitch": 0.9
+      },
+      {
+        "name": "minecraft:mob/parrot/hurt1",
+        "pitch": 0.9
+      }
+    ],
+    "subtitle": "subtitles.entity.parrot.hurts"
+  },
+  "entity.parrot.step":{
+    "category": "neutral",
+    "sounds": [
+       "minecraft:mob/parrot/step1",
+       "minecraft:mob/parrot/step2",
+       "minecraft:mob/parrot/step3",
+	   "minecraft:mob/parrot/step4",
+       "minecraft:mob/parrot/step5"
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+item.Journal.name=§aJournal
+item.CarteBancaire.name=§3Ma Carte Bancaire
+item.GiletBullet.name=Gilet par balle
+item.IdentityCard.name=Carte d'identite
+
+item.itemCrowbar.name=Crowbar
+
+item.coin_1euro.name=§l§71§7€
+item.coin_2euro.name=§l§62€
+item.billet5.name=§l§75§7€
+item.billet10.name=§l§c10§c€
+item.billet20.name=§l§920§9€
+item.billet50.name=§l§650§6€
+item.billet100.name=§l§2100§2€
+item.billet200.name=§l§e200§e€
+item.billet500.name=§l§5500§5€
+
+
+itemGroup.crp_creative_tabs=CraftYourLifeRP
+
+tile.ATM.name=ATM
+tile.TrashCan.name=Poubelle
+tile.CorpseFreezerBlock.name=Congélateur
+tile.road.name=Route 1
+tile.Painting.name=Tableau
+tile.RoadBalise.name=Balise de route
+tile.CashRegister.name=Caisse enregistreuse
+tile.Computer.name=Ordinateur portable
+
+item.Kamsung.name=Kamsung
+
+tile.Extincteur.name=Extincteur
+item.Bouteille d'eau.name=Bouteille d'eau
+item.gold_ingot.name=Lingot d'or
+item.key.name=Clef de voiture
+item.BulletproofShield.name=Bouclier antiémeute
+
+item.stop_stick_2.name=Herse 2x4
+item.stop_stick_4.name=Herse 2x8
+item.stop_stick_6.name=Herse 2x12
+item.nuclear_pickaxe.name=§2Pioche de nucléaire
+item.nuclear_ingot.name=§aLingot de nucléaire
+tile.nuclear_block.name=§2Bloc de nucléaire
+tile.nuclear_ore.name=§aMinerai de nucléaire

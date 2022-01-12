@@ -1,0 +1,138 @@
+{
+    "mainmenusound":
+    {
+    "category": "player",
+    "sounds":
+        [
+            "mainmenusound"
+        ]
+    },
+    "call":
+    {
+    "category": "player",
+    "sounds":
+        [
+            "call"
+        ]
+    },
+    "call_ringtone":
+    {
+    "category": "player",
+    "sounds":
+        [
+            "call_ringtone"
+        ]
+    },
+    "phonekey":
+    {
+    "category": "player",
+    "sounds":
+        [
+            "phonekey"
+        ]
+    },
+    "sms_received":
+    {
+    "category": "player",
+    "sounds":
+        [
+            "sms_received"
+        ]
+    },
+    "atm_press":
+    {
+    "category": "player",
+    "sounds":
+        [
+            "atm_press"
+        ]
+    },
+    "unkown_number":
+    {
+    "category": "player",
+    "sounds":
+        [
+            "unknown_number"
+        ]
+    },
+    "false_request":
+    {
+    "category": "player",
+    "sounds":
+        [
+            "false_request"
+        ]
+    },
+    "extinguisher":
+    {
+    "category": "player",
+    "sounds":
+        [
+            "extinguisher"
+        ]
+    },
+    "bird":
+    {
+    "category": "player",
+    "sounds":
+        [
+            "bird"
+        ]
+    },
+    "notification":
+    {
+    "category": "master",
+    "sounds":
+        [
+            "hollow"
+        ]
+    },
+    "ballkick":
+    {
+    "category": "master",
+    "sounds":
+        [
+            "football-kick"
+        ]
+    },
+    "goal":
+    {
+    "category": "master",
+    "sounds":
+        [
+            "goal"
+        ]
+    },
+    "shield-hit":
+    {
+    "category": "master",
+    "sounds":
+        [
+            "shield-hit"
+        ]
+    },
+    "scream":
+    {
+    "category": "master",
+    "sounds":
+        [
+            "scream"
+        ]
+    },
+    "smoking_0":
+    {
+    "category": "master",
+    "sounds":
+        [
+            "smoking_state_0"
+        ]
+    },
+    "smoking_1":
+    {
+    "category": "master",
+    "sounds":
+        [
+            "smoking_state_1"
+        ]
+    } 
+}
