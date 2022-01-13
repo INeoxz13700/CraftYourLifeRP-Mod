@@ -84,14 +84,16 @@ public class CaptureHandler {
 		
 		if(!world.isRemote)
 		{
-			ExtendedPlayer extendedPlayer = ExtendedPlayer.get(event.player);
+			ExtendedPlayer extendedPlayer = ExtendedPlayer.get(event.player);		
+			
 			if(event.player.ticksExisted % 20 == 0)
 			{	
-				//for(Entity entity : (List<Entity>)world.loadedEntityList) entity.setDead();
 				HashMap<WorldSelector, CaptureProcess> captures = getCaptureableRegionForPlayer(event.player);
+				
 				List<CaptureProcess> updateableCaptures = null;
 				for(Map.Entry<WorldSelector, CaptureProcess> capture : captures.entrySet())
 				{			
+					
 					CaptureProcess process = capture.getValue();
 					if(process.playerInCondition(event.player)) 
 					{
@@ -132,6 +134,12 @@ public class CaptureHandler {
 						continue;
 					}
 					
+					if(!process.playerCaptureAlready(event.player))
+					{
+						toRemove.add(selector);
+						continue;
+					}
+					
 					if(!selector.entityInsideSelection(event.player))
 					{
 						process.onPlayerLeaveRegionCallback.call(event.player);
@@ -160,8 +168,23 @@ public class CaptureHandler {
 		{
 			if(updateableCaptures.containsKey(event.world))
 			{
+				List<CaptureProcess> toRemove = new ArrayList<CaptureProcess>();
 				List<CaptureProcess> captures = updateableCaptures.get(event.world);
-				for(CaptureProcess capture : captures) capture.update(event.world);
+				for(CaptureProcess capture : captures) 
+				{
+					 capture.update(event.world);
+					 
+					 if(capture.isCaptured())
+					 {
+						 capture.onRegionCapturedCallback.call(event.world);
+						 capture.lastCaptureTimer = System.currentTimeMillis();
+						 capture.clearEntities();
+						 capture.setTickCapture(0);
+						 capture.getPlayersInCapture().clear();
+						 toRemove.add(capture);
+					 }
+				}
+				captures.removeAll(toRemove);
 			}
 		}
 	}
@@ -191,6 +214,5 @@ public class CaptureHandler {
 		}
 		return null;	
 	}
-	
 	
 }

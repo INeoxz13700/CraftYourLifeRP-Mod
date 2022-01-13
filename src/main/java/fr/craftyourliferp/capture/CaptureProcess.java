@@ -49,6 +49,8 @@ public class CaptureProcess implements ISaveHandler
 	
 	private List<Entity> captureEntities;
 	
+	private List<String> captureEntitiesId;
+	
 	public ICallback onCaptureUpdate = new ICallback()
 	{
 
@@ -99,7 +101,7 @@ public class CaptureProcess implements ISaveHandler
 			selector.setSelectedPos1(Vec3.createVectorHelper(-196, 69, 1086));
 			selector.setSelectedPos2(Vec3.createVectorHelper(-196, 71, 1082));
 			selector.clearBlocksInArea();
-			for(EntityPlayer player : playersInCapture.values())
+			for(EntityPlayer player : getPlayersInCapture().values())
 			{
 				ServerUtils.sendMessage("§aZone sous contrôle!", player,1000,0);
 			}
@@ -116,14 +118,14 @@ public class CaptureProcess implements ISaveHandler
 		@Override
 		public void call(EntityPlayer player) 
 		{	
-			if(playersInCapture.size() == 0)
+			if(getPlayersInCapture().size() == 0)
 			{
 				onRegionCaptureStartCallback.call();
 			}
 			
 			ServerUtils.sendMessage("§cDes renforts arrivent prenez le contrôle de la zone!", player,1000,0);
 			
-			playersInCapture.put(player.getCommandSenderName(), player);
+			getPlayersInCapture().put(player.getCommandSenderName(), player);
 		}
 
 		@Override
@@ -139,11 +141,11 @@ public class CaptureProcess implements ISaveHandler
 		@Override
 		public void call(EntityPlayer player) 
 		{	
-			playersInCapture.remove(player.getCommandSenderName());
-			if(playersInCapture.size() == 0)
+			getPlayersInCapture().remove(player.getCommandSenderName());
+			if(getPlayersInCapture().size() == 0)
 			{
 				clearEntities();
-				tickCapture = 0;
+				setTickCapture(0);
 			}
 		}
 
@@ -154,10 +156,11 @@ public class CaptureProcess implements ISaveHandler
 	
 	protected CaptureProcess()
 	{
-		this.tickCapture = 0;
+		this.setTickCapture(0);
 		this.lastCaptureTimer = 0;
-		this.playersInCapture = new HashMap();
+		this.setPlayersInCapture(new HashMap());
 		this.captureEntities = new ArrayList();
+		this.captureEntitiesId = new ArrayList();
 	}
 	
 	public CaptureProcess(int captureAvaibleTimerInSeconds, int captureDurationInSeconds, int captureMaxEntities)
@@ -165,9 +168,10 @@ public class CaptureProcess implements ISaveHandler
 		this.captureDurationInSeconds = captureDurationInSeconds;
 		this.captureAvaibleTimerInSeconds = captureAvaibleTimerInSeconds;
 		this.captureMaxEntities = captureMaxEntities;
-		this.tickCapture = 0;
-		this.playersInCapture = new HashMap();
+		this.setTickCapture(0);
+		this.setPlayersInCapture(new HashMap());
 		this.captureEntities = new ArrayList();
+		this.captureEntitiesId = new ArrayList();
 	}
 
 	public boolean isCapturable(World world)
@@ -178,24 +182,21 @@ public class CaptureProcess implements ISaveHandler
 		return true;
 	}
 	
+	public boolean isCaptured()
+	{
+		return getTickCapture() >= captureDurationInSeconds * 20;
+	}
+	
 	public void update(World world)
 	{
 		onCaptureUpdate.call(world);
-		tickCapture += playersInCapture.size();
-		if(tickCapture >= captureDurationInSeconds * 20)
-		{
-			onRegionCapturedCallback.call(world);
-			tickCapture = 0;
-			lastCaptureTimer = System.currentTimeMillis();
-			playersInCapture.clear();
-			clearEntities();
-		}
+		setTickCapture(getTickCapture() + getPlayersInCapture().size());
 
-		if(tickCapture % 40 == 0)
+		if(getTickCapture() % 40 == 0)
 		{
-			for(EntityPlayer player : playersInCapture.values())
+			for(EntityPlayer player : getPlayersInCapture().values())
 			{
-				float capturePercentage = (tickCapture / (float) (captureDurationInSeconds * 20)) * 100;
+				float capturePercentage = (getTickCapture() / (float) (captureDurationInSeconds * 20)) * 100;
 				ServerUtils.sendMessage("Contrôle de la zone : §e" + (int)capturePercentage + "§f%", player, 500, 1);
 			}
 			
@@ -212,7 +213,7 @@ public class CaptureProcess implements ISaveHandler
 			
 			if(captureEntities.size() < captureMaxEntities)
 			{
-				List<String> entities = getCaptureEntities();
+				List<String> entities = getCaptureEntitiesId();
 				if(entities.size() == 0) return;
 				
 				String entityId = entities.get(MathHelper.getRandomIntegerInRange(world.rand, 0, entities.size()-1));
@@ -236,7 +237,6 @@ public class CaptureProcess implements ISaveHandler
 					Vec3 spawnPoint = selector.getRandomPosInSelection(true);
 					if(world.getBlock((int)spawnPoint.xCoord, (int) spawnPoint.yCoord, (int)spawnPoint.zCoord) == Blocks.air);
 					{
-						System.out.println(spawnPoint.xCoord + " " + spawnPoint.yCoord + " " + spawnPoint.zCoord);
 						entity.setPosition(spawnPoint.xCoord, spawnPoint.yCoord, spawnPoint.zCoord);
 						if (entity instanceof EntityNPCInterface) {
 							 EntityNPCInterface npc = (EntityNPCInterface)entity;
@@ -281,7 +281,7 @@ public class CaptureProcess implements ISaveHandler
 	
 	public boolean playerCaptureAlready(EntityPlayer player)
 	{
-		return playersInCapture.containsKey(player.getCommandSenderName());
+		return getPlayersInCapture().containsKey(player.getCommandSenderName());
 	}
 	
 	public int getCaptureDuration()
@@ -291,7 +291,7 @@ public class CaptureProcess implements ISaveHandler
 	
 	public int getPlayersCount()
 	{
-		return playersInCapture.size();
+		return getPlayersInCapture().size();
 	}
 	
 	public boolean entityCanSpawn(World world, Vec3 coordinates)
@@ -299,12 +299,9 @@ public class CaptureProcess implements ISaveHandler
 		return world.getBlock((int)coordinates.xCoord, (int)coordinates.yCoord, (int)coordinates.zCoord) == Blocks.air;
 	}
 	
-	public List<String> getCaptureEntities()
+	public List<String> getCaptureEntitiesId()
 	{
-		List<String> entitiesId = new ArrayList<String>();
-		entitiesId.add("customnpcs:Farcri");
-		entitiesId.add("Zombie");
-		return entitiesId;
+		return captureEntitiesId;
 	}
 	
 	public void clearEntities()
@@ -315,6 +312,23 @@ public class CaptureProcess implements ISaveHandler
 		}
 		captureEntities.clear();
 	}
+	
+	public int getTickCapture() {
+		return tickCapture;
+	}
+
+	public void setTickCapture(int tickCapture) {
+		this.tickCapture = tickCapture;
+	}
+
+	public HashMap<String, EntityPlayer> getPlayersInCapture() {
+		return playersInCapture;
+	}
+
+	public void setPlayersInCapture(HashMap<String, EntityPlayer> playersInCapture) {
+		this.playersInCapture = playersInCapture;
+	}
+	
 	
 	public static CaptureProcess copyFrom(CaptureProcess copy) throws IllegalArgumentException, IllegalAccessException
 	{
@@ -338,15 +352,29 @@ public class CaptureProcess implements ISaveHandler
 	public void writeToNbt(NBTTagCompound compound)
 	{
 		compound.setInteger("CaptureType", CraftYourLifeRPMod.captureHander.getCaptureType(this));
-		compound.setInteger("CaptureTick", tickCapture);
+		compound.setInteger("CaptureTick", getTickCapture());
 		compound.setLong("LastCaptureTimer", lastCaptureTimer);
+		NBTTagList tagList = new NBTTagList();
+		for(String entity : captureEntitiesId)
+		{
+			if(entity.isEmpty() || entity == null) continue;
+			
+			NBTTagString string = new NBTTagString(entity);
+			tagList.appendTag(string);
+		}
+		compound.setTag("EntitiesId", tagList);
 	}
 
 
 	@Override
 	public void readFromNbt(NBTTagCompound compound) {
-		tickCapture = compound.getInteger("CaptureTick");
+		setTickCapture(compound.getInteger("CaptureTick"));
 		lastCaptureTimer = compound.getLong("LastCaptureTimer");
+		NBTTagList tagList = (NBTTagList) compound.getTag("EntitiesId");
+		for(int i = 0; i < tagList.tagCount(); i++)
+		{
+			captureEntitiesId.add(tagList.getStringTagAt(i));
+		}
 	}
 	
 	@Override
@@ -366,5 +394,5 @@ public class CaptureProcess implements ISaveHandler
 	{
 		return captureDurationInSeconds + captureAvaibleTimerInSeconds;
 	}
-	
+
 }

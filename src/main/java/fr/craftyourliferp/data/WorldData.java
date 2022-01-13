@@ -466,7 +466,7 @@ public class WorldData extends WorldSavedData {
 		return true;
 	}
 	
-	private WorldSelector getCaptureRegionByName(String rgname)
+	public WorldSelector getCaptureRegionByName(String rgname)
 	{
 		Iterator<WorldSelector> iterator = capturesProcess.keySet().iterator();
 		

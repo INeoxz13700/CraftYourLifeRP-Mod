@@ -11,6 +11,7 @@ import com.flansmod.common.FlansMod;
 import com.flansmod.common.network.PacketOpenGui;
 import com.google.gson.Gson;
 
+import fr.craftyourliferp.capture.CaptureProcess;
 import fr.craftyourliferp.cosmetics.CosmeticObject;
 import fr.craftyourliferp.data.PlayerCachedData;
 import fr.craftyourliferp.data.WorldData;
@@ -30,6 +31,7 @@ import net.minecraft.block.BlockBed;
 import net.minecraft.block.BlockChest;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
@@ -311,6 +313,86 @@ public class CommandApi implements ICommand {
     						WorldSelector region = iterator.next();
         					sender.addChatMessage(new ChatComponentText("§b- " + region.getName()));
     					}
+    				}
+    				else if(args[1].equalsIgnoreCase("entity"))
+    				{
+						EntityPlayer player = (EntityPlayer)sender;
+						WorldData worldData = WorldData.get(player.worldObj);
+    					if(args.length == 5)
+    					{
+    						if(!args[2].isEmpty() && !args[3].isEmpty() && !args[4].isEmpty())
+        					{
+        						WorldSelector selector = worldData.getCaptureRegionByName(args[4]);
+        						
+        						if(selector == null)
+        						{
+        							ServerUtils.sendChatMessage(player, "§cRegion inexistant");
+        							return;
+        						}
+        						
+        						CaptureProcess process = worldData.capturesProcess.get(selector);
+        						
+        						String entityId = args[3];
+        						
+        						if(!entityId.startsWith("customnpcs:") && !EntityList.stringToClassMapping.containsKey(args[3]))
+        						{
+        							entityId = "customnpcs:" + entityId;
+        						}
+        						
+            					if(args[2].equalsIgnoreCase("add"))
+            					{
+            						if(!process.getCaptureEntitiesId().contains(entityId))
+            						{
+            							process.getCaptureEntitiesId().add(entityId);
+            							ServerUtils.sendChatMessage(player, "§eL'entité §6" + entityId + " §ea été ajouté au capture.");
+            						}
+            						else
+            						{
+            							ServerUtils.sendChatMessage(player, "§cCette entité existe déjà.");
+            						}
+            					}
+            					else if(args[2].equalsIgnoreCase("remove"))
+            					{
+            						if(process.getCaptureEntitiesId().contains(entityId))
+            						{
+            							process.getCaptureEntitiesId().remove(entityId);
+            							ServerUtils.sendChatMessage(player, "§eL'entité §6" + entityId + " §ea été retiré du capture.");
+            						}
+            						else
+            						{
+            							ServerUtils.sendChatMessage(player, "§cCette entité n'existe pas dans la région.");
+            						}
+            					}
+        					}
+    					}
+    					else if(args.length == 4)
+    					{
+    						if(args[2].equalsIgnoreCase("list") && !args[3].isEmpty())
+    						{
+        						WorldSelector selector = worldData.getCaptureRegionByName(args[3]);
+        						if(selector == null)
+        						{
+        							ServerUtils.sendChatMessage(player, "§cRegion inexistant");
+        							return;
+        						}
+        						ServerUtils.sendChatMessage(player, "§aListe d'entités :");
+        						CaptureProcess process = worldData.capturesProcess.get(selector);
+        						for(String entityId : process.getCaptureEntitiesId())
+        						{
+        							ServerUtils.sendChatMessage(player, "§e- " + entityId);
+        						}
+    						}
+    					}
+    				}
+    				else if(args[1].equalsIgnoreCase("help"))
+    				{
+    					ServerUtils.sendChatMessage(sender, "§cListes des commandes capture : ");
+						ServerUtils.sendChatMessage(sender, "§c/api capture list - liste des captures");
+						ServerUtils.sendChatMessage(sender, "§c/api capture create <nom> <type de capture> - créer une region de capture");
+						ServerUtils.sendChatMessage(sender, "§c/api capture delete <nom> - supprimer une region de capture");
+						ServerUtils.sendChatMessage(sender, "§c/api capture entity add <nom entité> <nom capture> - ajouté un entité dans la capture");
+						ServerUtils.sendChatMessage(sender, "§c/api capture entity remove <nom entité> <nom capture> - retiré un entité de la capture");
+						ServerUtils.sendChatMessage(sender, "§c/api capture entity list <nom capture> - affiche la liste des entités dans la capture");
     				}
     			}
     			else if(args[0].equalsIgnoreCase("menotte"))
