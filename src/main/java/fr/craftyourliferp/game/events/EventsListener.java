@@ -751,7 +751,6 @@ public class EventsListener {
 	{
 		if(!event.world.isRemote)
 		{
-			System.out.println(event.x + " " + event.y + " " + event.z);
 			if(event.action == Action.RIGHT_CLICK_BLOCK)
 			{
 				List<EntityStopStick> stopsticks = (List<EntityStopStick>) event.world.loadedEntityList.stream().filter(x -> x instanceof EntityStopStick).collect(Collectors.toList());
