@@ -45,6 +45,7 @@ public class ItemBulletproofShieldRenderer implements IItemRenderer {
 	
 	public ItemBulletproofShieldRenderer()
 	{
+		
 		model = AdvancedModelLoader.loadModel(new ResourceLocation("craftyourliferp","items/models/BulletproofShield.obj"));
 	}
 	
@@ -173,7 +174,7 @@ public class ItemBulletproofShieldRenderer implements IItemRenderer {
 		GL11.glPushMatrix();
 			
 		GL11.glScalef(1f, 1f, 1f);
-		GL11.glTranslatef(0, -0.1f, 0);
+		GL11.glTranslatef(-0.05f, -0.24f, 0);
 		GL11.glRotatef(-80, 0, 1, 0);
 		model.renderAll();
 	
