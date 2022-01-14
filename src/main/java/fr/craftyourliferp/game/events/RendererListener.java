@@ -27,7 +27,6 @@ import fr.craftyourliferp.guicomponents.UIProgressBar;
 import fr.craftyourliferp.ingame.gui.CylrpMessageHUD;
 import fr.craftyourliferp.ingame.gui.GuiBase;
 import fr.craftyourliferp.ingame.gui.GuiPause;
-import fr.craftyourliferp.ingame.gui.NotificationBox.NotificationType;
 import fr.craftyourliferp.items.ModdedItems;
 import fr.craftyourliferp.main.ClientProxy;
 import fr.craftyourliferp.main.CraftYourLifeRPMod;

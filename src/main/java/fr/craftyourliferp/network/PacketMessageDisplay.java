@@ -14,7 +14,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import fr.craftyourliferp.game.events.OverlayRendererListener;
 import fr.craftyourliferp.ingame.gui.CylrpMessageHUD;
-import fr.craftyourliferp.ingame.gui.NotificationBox.NotificationType;
 
 public class PacketMessageDisplay extends PacketBase
 {
@@ -25,7 +24,6 @@ public class PacketMessageDisplay extends PacketBase
     /*
      * 0: hudmessage
      * 1: hudsubmessage
-     * 2: hudnotification
      */
     public byte type;
     
@@ -68,7 +66,7 @@ public class PacketMessageDisplay extends PacketBase
     @SideOnly(Side.CLIENT)
     public void handleClientSide(EntityPlayer client)
     {
-    	if(type == 0 || type == 1) CylrpMessageHUD.sendMessage(message,duration,type);
+    	CylrpMessageHUD.sendMessage(message,duration,type);
     }
 
 

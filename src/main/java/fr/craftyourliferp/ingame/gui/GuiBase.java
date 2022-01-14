@@ -29,7 +29,6 @@ import fr.craftyourliferp.guicomponents.UIDropdown;
 import fr.craftyourliferp.guicomponents.UIImage;
 import fr.craftyourliferp.guicomponents.UIRect;
 import fr.craftyourliferp.guicomponents.UITextField;
-import fr.craftyourliferp.ingame.gui.NotificationBox.NotificationType;
 import fr.craftyourliferp.utils.GuiUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -56,11 +55,7 @@ public class GuiBase extends GuiScreen implements IGuiEmplacement {
 	private List<GraphicObject> components = new ArrayList();
 	
 	protected List<UIDialogBox> dialogBoxs = new ArrayList();
-	
-	protected NotificationBox currentDisplayedNotification;
-	
-	private Queue<NotificationBox> notificationBoxs = new ConcurrentLinkedQueue();
-	
+		
 	private RenderItem itemRenderer;
 	
 	private int guiTicks;
@@ -253,15 +248,6 @@ public class GuiBase extends GuiScreen implements IGuiEmplacement {
 	@Override
 	protected void mouseClicked(int x, int y, int mouseBtn)
     {		
-		if(currentDisplayedNotification != null)
-		{
-			if(currentDisplayedNotification.isHover(x, y))
-			{
-				currentDisplayedNotification.onLeftClick(x, y);
-				return;
-			}
-		}
-		
 		if(dialogBoxs.size() > 0)
 		{
 			for(int i = 0; i < dialogBoxs.size(); i++)
@@ -405,31 +391,7 @@ public class GuiBase extends GuiScreen implements IGuiEmplacement {
 			child.drawScreen(x, y, partialTicks);
 			
 		}
-		
-		
-		if(currentDisplayedNotification != null)
-		{
-			currentDisplayedNotification.draw(x, y);
-			if(guiTicks % 20 == 0)
-			{
-				currentDisplayedNotification.leftSeconds--;
-				if(currentDisplayedNotification.leftSeconds <= 0)
-				{
-					currentDisplayedNotification = null;
-				}
-			}
-			
-		}
-		else
-		{
-			currentDisplayedNotification = getNextNotification();
-			if(currentDisplayedNotification != null)
-			{
-		        Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation(currentDisplayedNotification.getSound()), 1.0F));
-			}
-		}
-		
-		
+
 	}
 	
 
@@ -604,28 +566,6 @@ public class GuiBase extends GuiScreen implements IGuiEmplacement {
 	{
 		
 	}
-
-	public void displayNotification(String tittle, String message, NotificationType type, int displayInSeconds, boolean closeBtn)
-	{
-		this.displayNotification(getWindowWidth()-152,getWindowHeight()-51,150,50,tittle, message, type, displayInSeconds,closeBtn);
-	}
-	
-	public void displayNotification(int x, int y, int width, int height,String tittle, String message, NotificationType type, int displayInSeconds, boolean closeBtn)
-	{
-		NotificationBox box = NotificationBox.newInstance(tittle, message, type, new CallBackObject()
-		{
-			@Override
-			public void call()
-			{
-				currentDisplayedNotification = null;
-			}
-			
-		}, displayInSeconds, closeBtn);
-		
-		box.setPosition(x, y, width, height);
-		
-		notificationBoxs.offer(box);
-	}
 	
 	public GuiBase activeAutomaticNightMode()
 	{
@@ -633,10 +573,6 @@ public class GuiBase extends GuiScreen implements IGuiEmplacement {
 		return this;
 	}
 	
-	public NotificationBox getNextNotification()
-	{
-		return notificationBoxs.poll();
-	}
 	
 	public void setNightMode(List<UIColor> componentsToAffect)
 	{
