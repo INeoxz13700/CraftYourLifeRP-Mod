@@ -1,12 +1,4 @@
 {
-    "mainmenusound":
-    {
-    "category": "player",
-    "sounds":
-        [
-            "mainmenusound"
-        ]
-    },
     "call":
     {
     "category": "player",
@@ -77,14 +69,6 @@
     "sounds":
         [
             "bird"
-        ]
-    },
-    "notification":
-    {
-    "category": "master",
-    "sounds":
-        [
-            "hollow"
         ]
     },
     "ballkick":
