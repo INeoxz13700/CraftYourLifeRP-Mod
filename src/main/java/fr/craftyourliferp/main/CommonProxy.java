@@ -11,6 +11,7 @@ import fr.craftyourliferp.fire.FireHandler;
 import fr.craftyourliferp.game.events.CollisionListener;
 import fr.craftyourliferp.game.events.EntityTrackerHandler;
 import fr.craftyourliferp.game.events.EventsListener;
+import fr.craftyourliferp.game.events.GuiContainerHandler;
 import fr.craftyourliferp.game.events.PlayerItemInteractionListener;
 import fr.craftyourliferp.game.events.RendererListener;
 import fr.craftyourliferp.game.events.TicksHandler;
@@ -65,7 +66,10 @@ public class CommonProxy {
         MinecraftForge.EVENT_BUS.register(CraftYourLifeRPMod.fireHandler); 
         
       	FMLCommonHandler.instance().bus().register(CraftYourLifeRPMod.captureHander);
-        MinecraftForge.EVENT_BUS.register(CraftYourLifeRPMod.captureHander); 
+        MinecraftForge.EVENT_BUS.register(CraftYourLifeRPMod.captureHander);
+        
+        NetworkRegistry.INSTANCE.registerGuiHandler(CraftYourLifeRPMod.instance, new GuiContainerHandler());
+
 	}
 	
 	public EntityPlayer getPlayerEntity(MessageContext ctx) {

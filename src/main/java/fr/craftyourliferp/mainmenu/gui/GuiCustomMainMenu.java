@@ -44,7 +44,6 @@ import fr.craftyourliferp.guicomponents.UITextField;
 import fr.craftyourliferp.guireaderfile.UIReader;
 import fr.craftyourliferp.ingame.gui.GuiBase;
 import fr.craftyourliferp.ingame.gui.GuiScrollableView;
-import fr.craftyourliferp.ingame.gui.NotificationBox.NotificationType;
 import fr.craftyourliferp.main.CraftYourLifeRPClient;
 import fr.craftyourliferp.main.CraftYourLifeRPMod;
 import fr.craftyourliferp.utils.GuiUtils;
@@ -69,9 +68,7 @@ public class GuiCustomMainMenu extends GuiBase {
 	private long lastCheck;
 	
 	public ServerData data;
-	
-	private boolean firstInit = true;
-	
+		
     
     public GuiCustomMainMenu()
     {
@@ -89,14 +86,6 @@ public class GuiCustomMainMenu extends GuiBase {
     	this.setWindowSize(width, height);
     	this.activeAutomaticNightMode();
     	
-    	if(firstInit)
-    	{
-    		firstInit = false;
-			if(CraftYourLifeRPMod.getClientData().currentSession != null)
-			{
-				super.displayNotification("Rebonjour", "Hey " + CraftYourLifeRPMod.getClientData().currentSession.getUsername() , NotificationType.INFORMATIONS, 10, true);
-			}
-    	}
     	
     	    	
     	if(CraftYourLifeRPMod.localhost)

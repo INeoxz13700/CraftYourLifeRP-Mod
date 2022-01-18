@@ -19,6 +19,7 @@ import fr.craftyourliferp.guicomponents.UIColor;
 import fr.craftyourliferp.guicomponents.UIProgressBar;
 import fr.craftyourliferp.guicomponents.UIRect;
 import fr.craftyourliferp.ingame.gui.GuiBase;
+import fr.craftyourliferp.ingame.gui.GuiInventoryRP;
 import fr.craftyourliferp.ingame.gui.GuiPause;
 import fr.craftyourliferp.ingame.gui.GuiSleeping;
 import fr.craftyourliferp.items.ModdedItems;
@@ -27,6 +28,7 @@ import fr.craftyourliferp.main.CraftYourLifeRPClient;
 import fr.craftyourliferp.main.CraftYourLifeRPMod;
 import fr.craftyourliferp.main.ExtendedPlayer;
 import fr.craftyourliferp.mainmenu.gui.GuiCheckUpdate;
+import fr.craftyourliferp.network.PacketOpenGui;
 import fr.craftyourliferp.utils.GuiUtils;
 import fr.craftyourliferp.utils.MathsUtils;
 import net.minecraft.block.Block;
@@ -37,6 +39,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.GameSettings;
@@ -47,6 +50,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
 public class OverlayRendererListener {
@@ -396,16 +400,23 @@ public class OverlayRendererListener {
     
 	@SideOnly(Side.CLIENT)
     @SubscribeEvent
-    public void onRenderTickEvent(TickEvent.RenderTickEvent event) 
+    public void onGuiOpen(GuiOpenEvent event) 
 	{
-        if (Minecraft.getMinecraft().currentScreen instanceof GuiMainMenu) 
+		Minecraft mc = Minecraft.getMinecraft();
+        /*if (event.gui instanceof GuiMainMenu) mc.displayGuiScreen(new GuiCheckUpdate());*/
+        
+        if(event.gui instanceof GuiIngameMenu)
         {
-        	//Minecraft.getMinecraft().displayGuiScreen(new GuiCheckUpdate());
+        	event.setCanceled(true);
+        	mc.displayGuiScreen(new GuiPause());
         }
-        else if(Minecraft.getMinecraft().currentScreen instanceof GuiIngameMenu)
+        else if(event.gui instanceof GuiInventory) 
         {
-        	Minecraft.getMinecraft().displayGuiScreen(new GuiPause());
+        	event.setCanceled(true);
+        	CraftYourLifeRPMod.packetHandler.sendToServer(new PacketOpenGui((byte)0));
         }
+        
+        
     }
 	
 	@SideOnly(Side.CLIENT)
@@ -415,7 +426,6 @@ public class OverlayRendererListener {
 		Minecraft mc = Minecraft.getMinecraft();
 		
 		RenderManager.debugBoundingBox = false;
-		
 		mc.gameSettings.thirdPersonView = 0;
 		
 		if(event.phase == event.phase.END)

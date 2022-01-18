@@ -210,7 +210,7 @@ public class EventsListener {
 	@SubscribeEvent
 	public void onJoin(PlayerLoggedInEvent event) {
 		EntityPlayer player = event.player;
-
+				
 		if(MinecraftServer.getServer().isDedicatedServer())
 		{		
 
@@ -447,10 +447,10 @@ public class EventsListener {
 	
 	
 	@SubscribeEvent
-	public void onPlayerMove(PlayerTickEvent event)
+	public void onPlayerTick(PlayerTickEvent event)
 	{
-			EntityPlayer player = event.player;	
-
+			EntityPlayer player = event.player;
+			//System.out.println(player.openContainer);
 			//PlayerCachedData data = PlayerCachedData.getData(player);
 			ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
 			if(event.phase == event.phase.END)
@@ -482,8 +482,6 @@ public class EventsListener {
 					player.rotationPitch = 0F;
 			        player.cameraYaw = 0F;
 				}
-				
-			
 				
 				if(!event.player.worldObj.isRemote)
 				{				
@@ -1213,7 +1211,8 @@ public class EventsListener {
     }
     
     @SubscribeEvent
-    public void onInteract(PlayerInteractEvent event) {
+    public void onInteract(PlayerInteractEvent event)
+    {
     	if(!event.entityPlayer.worldObj.isRemote)
     	{
 	        //PlayerCachedData data = PlayerCachedData.getData(event.entityPlayer);

@@ -20,6 +20,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -78,6 +79,7 @@ import fr.craftyourliferp.entities.renderer.RenderSkinnedBody;
 import fr.craftyourliferp.entities.renderer.RenderStopStick;
 import fr.craftyourliferp.game.events.CollisionListener;
 import fr.craftyourliferp.game.events.EventsListener;
+import fr.craftyourliferp.game.events.GuiContainerHandler;
 import fr.craftyourliferp.game.events.MouseListener;
 import fr.craftyourliferp.game.events.OverlayRendererListener;
 import fr.craftyourliferp.game.events.PlayerItemInteractionListener;
@@ -227,6 +229,8 @@ public class ClientProxy extends CommonProxy {
         
       	FMLCommonHandler.instance().bus().register(CraftYourLifeRPMod.captureHander);
         MinecraftForge.EVENT_BUS.register(CraftYourLifeRPMod.captureHander); 
+    
+        NetworkRegistry.INSTANCE.registerGuiHandler(CraftYourLifeRPMod.instance, new GuiContainerHandler());
     }
 	
 	public void registerRenderers() 
