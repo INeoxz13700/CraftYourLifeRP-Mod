@@ -32,7 +32,6 @@ public class RenderCustomPlayer extends RenderPlayerBase  {
 		 //PlayerCachedData cachedData = PlayerCachedData.getData(paramAbstractClientPlayer);
 		 ExtendedPlayer cachedData = ExtendedPlayer.get(paramAbstractClientPlayer);
 
-		 
 		 if(cachedData != null && cachedData.isProning())
 		 {
 	         float f6 = paramAbstractClientPlayer.prevLimbSwingAmount + (paramAbstractClientPlayer.limbSwingAmount - paramAbstractClientPlayer.prevLimbSwingAmount) * paramFloat;
@@ -48,15 +47,13 @@ public class RenderCustomPlayer extends RenderPlayerBase  {
 		 ExtendedPlayer cachedData = ExtendedPlayer.get(paramEntityPlayer);
 		 if(Minecraft.getMinecraft().currentScreen != null && cachedData != null)
 		 {
-			 if(cachedData.isProning())
+			 if(cachedData.isSleeping())
 			 {
-				 GL11.glRotatef(90, 1f, 0f, 0f);
-
-				 GL11.glTranslatef(0.4f, -1F, -0.5f);
-				 GL11.glScalef(1.2f, 1.2f, 1.2f);
+				 return;
 			 }
-			 else if(cachedData.isSleeping())
+			 else if(cachedData.isProning())
 			 {
+				 if(paramEntityPlayer.getHeldItem() == null)
 				 return;
 			 }
 		 }

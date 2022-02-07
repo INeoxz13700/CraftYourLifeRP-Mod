@@ -26,6 +26,7 @@ import com.flansmod.common.driveables.EntityPlane;
 import com.flansmod.common.driveables.EntitySeat;
 import com.flansmod.common.driveables.EntityVehicle;
 import com.flansmod.common.driveables.EnumDriveablePart;
+import com.google.gson.JsonSyntaxException;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
@@ -77,6 +78,7 @@ import fr.craftyourliferp.ingame.gui.GuiPedagogical;
 import fr.craftyourliferp.ingame.gui.GuiPhone;
 import fr.craftyourliferp.items.CardIdentity;
 import fr.craftyourliferp.items.IItemPress;
+import fr.craftyourliferp.items.ItemBulletproofShield;
 import fr.craftyourliferp.items.ItemVestBullet;
 import fr.craftyourliferp.items.ModdedItems;
 import fr.craftyourliferp.items.PaintingItem;
@@ -118,8 +120,11 @@ import net.minecraft.block.BlockEnchantmentTable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.GuiSelectWorld;
+import net.minecraft.client.gui.inventory.GuiContainerCreative;
+import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.command.ServerCommand;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -131,7 +136,10 @@ import net.minecraft.entity.player.EntityPlayer.EnumChatVisibility;
 import net.minecraft.entity.player.EntityPlayer.EnumStatus;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
@@ -171,14 +179,13 @@ import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerOpenContainerEvent;
@@ -219,7 +226,6 @@ public class EventsListener {
 	    		event.player.setPosition(-1150f, 65f, -1146);
 	    	}
 	    	
-			//PlayerCachedData data = PlayerCachedData.createCachedData(player);
 			ExtendedPlayer data = ExtendedPlayer.get(player);
 	    	
 	    	player.setInvisible(true);
@@ -227,7 +233,6 @@ public class EventsListener {
 		}
 		else
 		{
-			//PlayerCachedData data = PlayerCachedData.createCachedData(player);
 			ExtendedPlayer data = ExtendedPlayer.get(player);
 
 			data.passwordReceived = true;
@@ -238,15 +243,6 @@ public class EventsListener {
 	
 	@SubscribeEvent
 	public void onLeft(PlayerLoggedOutEvent event) {
-		/*PlayerCachedData data = PlayerCachedData.getData(event.player);
-		
-		WorldData.get(event.player.worldObj).driveablesManager.onPlayerDisconnect(event.player);
-		
-		if(data == null) return;
-		
-		data.onPlayerDisconnect();
-		*/
-				
 		WorldData.get(event.player.worldObj).driveablesManager.onPlayerDisconnect(event.player);
 	}
 	
@@ -311,7 +307,6 @@ public class EventsListener {
 		System.out.println("/passwordsync " + player.getCommandSenderName());
 	}
 		
-	
 	 @SideOnly(Side.CLIENT)
 	 @SubscribeEvent
 	 public void onClientReceiveData(ClientChatReceivedEvent event) 
@@ -445,16 +440,14 @@ public class EventsListener {
 		}
 	}
 	
-	
 	@SubscribeEvent
 	public void onPlayerTick(PlayerTickEvent event)
 	{
 			EntityPlayer player = event.player;
-			//System.out.println(player.openContainer);
 			//PlayerCachedData data = PlayerCachedData.getData(player);
 			ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
 			if(event.phase == event.phase.END)
-			{
+			{			
 				if(extendedPlayer.isSleeping())
 				{
 					
@@ -465,7 +458,7 @@ public class EventsListener {
 					{
 						if(extendedPlayer.getgAlcolInBlood() < 4.0F)
 						{
-							extendedPlayer.setgAlcolInBlood(extendedPlayer.getgAlcolInBlood()-0.005F);
+							extendedPlayer.setgAlcolInBlood(extendedPlayer.getgAlcolInBlood()-0.00040F);
 						}
 					}
 					double yDelta = 0.0D;
@@ -491,21 +484,6 @@ public class EventsListener {
 						{
 							ExtendedPlayer.forceWakeupPlayer(player);
 						}
-						
-						if(extendedPlayer.shouldBeInEthylicComa() && extendedPlayer.reanimatorPlayerName != null)
-						{
-							float reanimationPercentage = (float)extendedPlayer.sleepingTime/2400f * 100f;
-
-							ServerUtils.sendMessage("§cRéanimation en cours : §a" + (int)reanimationPercentage + "%" , player, 1000, 1);
-							if(reanimationPercentage >= 100)
-							{
-								extendedPlayer.reanimatorPlayerName = null;
-								extendedPlayer.setgAlcolInBlood(0F);
-								player.clearActivePotions();
-								ServerUtils.sendMessage("§aVous avez survécu à votre coma!", player,1000,1);
-								ExtendedPlayer.forceWakeupPlayer(player);
-							}
-						}
 					}
 				
 					float playergAlcolInBlood = extendedPlayer.getgAlcolInBlood();
@@ -521,7 +499,6 @@ public class EventsListener {
 						int time = (int) ((extendedPlayer.getgAlcolInBlood()*4)*50/4);
 						int effectPower = (int) (4-(4-extendedPlayer.getgAlcolInBlood()));
 						
-						player.addPotionEffect(new PotionEffect(9,(int) time,(int)extendedPlayer.getgAlcolInBlood()-1));
 
 						if(effectPower > 0) player.addPotionEffect(new PotionEffect(Potion.moveSlowdown.id,time,effectPower-1));
 						
@@ -530,9 +507,9 @@ public class EventsListener {
 					
 					if(extendedPlayer.getgAlcolInBlood() >= 4)
 					{
-						if(MathHelper.getRandomIntegerInRange(player.getRNG(), 0, 20*3) == 0)
+						if(MathHelper.getRandomIntegerInRange(player.getRNG(), 0, 20*15) == 0)
 						{
-							player.attackEntityFrom(DamageSource.drown, 0.5F);
+							player.attackEntityFrom(new DamageSource("alcol"), 0.5F);
 						}
 					}
 					
@@ -545,24 +522,18 @@ public class EventsListener {
 						}
 					}
 					
-					if(player.isEating() && player.getHeldItem().getItem() instanceof ItemCigarette)
+					if(player.isUsingItem() && player.getHeldItem().getItem() instanceof ItemCigarette)
 					{
-						float duration = player.getItemInUseCount();
-						if(duration == 28)
+						extendedPlayer.itemPressTicks++;
+						if(extendedPlayer.itemPressTicks >= 40)
 						{
-					         player.worldObj.playSoundAtEntity(player, "craftyourliferp:smoking_0", 0.5F,  player.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+							extendedPlayer.itemPressTicks = 0;
+						    player.worldObj.playSoundAtEntity(player, "craftyourliferp:smoking_0", 0.5F,  player.worldObj.rand.nextFloat() * 0.1F + 0.9F);
 						}
 					}
 															
 					if(player.ticksExisted % 20 == 0)
 					{	
-						/*if(data.connectionPos != null)
-						{
-							if(player.posX != data.connectionPos.xCoord || player.posY != data.connectionPos.yCoord || player.posZ != data.connectionPos.zCoord)
-							{		
-								player.setPositionAndUpdate(data.connectionPos.xCoord, data.connectionPos.yCoord, data.connectionPos.zCoord);
-							}
-					    }*/
 						
 						if(extendedPlayer.connectionPos != null)
 						{
@@ -573,50 +544,10 @@ public class EventsListener {
 					    }
 					}
 					
-					//if(data.stealingTile == null) return;
 					if(extendedPlayer.stealingTile == null) return;
 					
 					if(player.ticksExisted % 5 == 0)
 					{
-
-						/*if(data.isStealing())
-						{
-							
-							if(data.serverData.job == null || !ServerUtils.isIlegalJob(data.serverData.job))
-							{
-								
-								player.addChatComponentMessage(new ChatComponentText("§cVous ne pouvez pas braquer"));
-								player.addChatComponentMessage(new ChatComponentText("§cVous êtes hors service ou n'avez pas le métier nécessaire"));
-
-								data.setNotStealing();
-								return;
-							}
-							
-							MovingObjectPosition mop = ExtendedPlayer.rayTraceServer(player, 4.0D, 1.0F);
-							
-							TileEntity tileEntity = (TileEntity) player.worldObj.getTileEntity(mop.blockX, mop.blockY, mop.blockZ);
-							
-							if(tileEntity == null)
-							{
-								tileEntity = (TileEntity) player.worldObj.getTileEntity(mop.blockX, mop.blockY+1, mop.blockZ);
-							}
-						
-							IStealingTileEntity stealingTileEntity = (IStealingTileEntity) tileEntity;
-							TileEntity dataTile = (TileEntity) data.stealingTile;
-							
-							if(player.getHeldItem() != null)
-							{
-								data.setNotStealing();
-								player.addChatMessage(new ChatComponentText("§cVol annulé vous ne devez rien avoir en main"));
-							}
-							
-							if(tileEntity == null || !(tileEntity instanceof IStealingTileEntity) || dataTile != tileEntity)
-							{
-								data.setNotStealing();
-								player.addChatMessage(new ChatComponentText("§cVol annulé rapprochez-vous ou visez bien le block"));
-							}
-						}*/
-						
 						if(extendedPlayer.isStealing())
 						{
 							
@@ -660,15 +591,6 @@ public class EventsListener {
 					
 					if(player.ticksExisted % 10 == 0)
 					{
-						/*if(data.isStealing())
-						{
-							
-							if((System.currentTimeMillis() - data.stealingTile.getStealingStartedTime()) / 1000 >= data.stealingTile.getStealingTime())
-							{
-								data.stealingTile.finalizeStealing();	
-							}
-						}*/
-						
 						if(extendedPlayer.isStealing())
 						{
 							
@@ -684,8 +606,10 @@ public class EventsListener {
 				}
 				else
 				{
+					
+		
 
-					if(player.getHealth() < player.getMaxHealth() / 2f)
+					if(player.getHealth() < player.getMaxHealth() / 2f || player.getHeldItem() != null && player.getHeldItem().getItem() == ModdedItems.itemBulletproofShield)
 					{
 						player.motionX *= 0.65;
 						player.motionY *= 0.999985;
@@ -695,7 +619,7 @@ public class EventsListener {
 					
 					
 					Minecraft mc = Minecraft.getMinecraft();
-					if(extendedPlayer.isProning())//if(data.isProning())
+					if(extendedPlayer.isProning())
 					{
 						if(player.isSprinting())
 						{
@@ -732,11 +656,45 @@ public class EventsListener {
 		{
 			if(event.action == Action.RIGHT_CLICK_BLOCK)
 			{
-				Block block = event.world.getBlock(event.x, event.y, event.z);
-				if(block == Blocks.bed)
+				if(ServerUtils.isOp(event.entityPlayer) && event.entityPlayer.capabilities.isCreativeMode)
 				{
-					ExtendedPlayer.forcePlayerSleep(event.entityPlayer, event.x, event.y, event.z);
-					event.setCanceled(true);
+					if(event.entityPlayer.getHeldItem() != null &&  event.entityPlayer.getHeldItem().hasDisplayName() && event.entityPlayer.getHeldItem().getDisplayName().equals(ReanimationHandler.syringeDisplayName))
+					{
+						WorldData worldData = WorldData.get(event.world);
+						if(event.entityPlayer.isSneaking())
+						{
+
+							if(worldData.removeHospitalBed(new ChunkCoordinates(event.x, event.y, event.z)))
+        					{
+        						ServerUtils.sendChatMessage(event.entityPlayer, "§aLit d'hôpital supprimé avec succès!");
+        					}
+        					else
+        					{
+        						ServerUtils.sendChatMessage(event.entityPlayer, "§cCe lit d'hôpital n'existe pas");
+        					}
+						}
+						else
+						{
+							if(worldData.addHospitalBed(new ChunkCoordinates(event.x, event.y, event.z), "Chambre " + (worldData.hospitalBeds.size()+1)))
+        					{
+        						ServerUtils.sendChatMessage(event.entityPlayer, "§aLit d'hôpital ajouté avec succès!");
+        					}
+        					else
+        					{
+        						ServerUtils.sendChatMessage(event.entityPlayer, "§cCe lit d'hôpital existe déjà ou il n'y a pas de tête de lit dans votre clique");
+        					}
+						}
+						event.setCanceled(true);
+					}
+				}
+				else
+				{
+					Block block = event.world.getBlock(event.x, event.y, event.z);
+					if(block == Blocks.bed)
+					{
+						ExtendedPlayer.forcePlayerSleep(event.entityPlayer, event.x, event.y, event.z,false);
+						event.setCanceled(true);
+					}
 				}
 			}
 		}
@@ -947,27 +905,7 @@ public class EventsListener {
             ExtendedPlayer.register((EntityPlayer) event.entity);
         }
     }
-    
-    
-    @SubscribeEvent
-    public void onLivingDeathEvent(LivingDeathEvent event)
-    {
-        if (!event.entity.worldObj.isRemote && event.entity instanceof EntityPlayer)
-        {
-        	EntityPlayer player = (EntityPlayer) event.entity;
-        	
-            NBTTagCompound playerData = new NBTTagCompound();
-            ((ExtendedPlayer) (event.entity.getExtendedProperties(ExtendedPlayer.EXT_PROP_NAME))).saveNBTData(playerData);
-            CommonProxy.storeEntityData(((EntityPlayer) event.entity).getDisplayName(), playerData);
-            ExtendedPlayer.saveProxyData((EntityPlayer) event.entity);      
-            
-    		NetworkCallTransmitter activeCall = NetworkCallTransmitter.getByUsername(player.getCommandSenderName());
-    		if(activeCall != null)
-    		{
-    			activeCall.finishCall();
-    		}
-        }    
-    }
+   
     
     @SubscribeEvent
     public void onClonePlayer(PlayerEvent.Clone e) 
@@ -985,36 +923,6 @@ public class EventsListener {
             exp.loadNBTData(compound);
             
         }
-    }
-    
-    @SubscribeEvent
-    public void onPlayerRespawn(PlayerRespawnEvent e)
-    {
-    	/*PlayerCachedData cachedData = PlayerCachedData.getData(e.player);
-    	if(!e.player.worldObj.isRemote)
-    	{
-    		ExtendedPlayer ep = ExtendedPlayer.get(e.player);
-    		ep.shield.setShield(ShieldStats.initialShield);
-    		ep.thirst.setThirst(ThirstStats.initialThirst);
-    		ep.setgAlcolInBlood(0F);	
-    	}
-    	
-		cachedData.currentAnimation = 0;
-    	cachedData.setProning(false);*/
-    	
-		ExtendedPlayer extendedPlayer = ExtendedPlayer.get(e.player);
-    	if(!e.player.worldObj.isRemote)
-    	{
-    		extendedPlayer.shield.setShield(ShieldStats.initialShield);
-    		extendedPlayer.thirst.setThirst(ThirstStats.initialThirst);
-    		extendedPlayer.setgAlcolInBlood(0F);
-    		extendedPlayer.syncPhone();
-    		extendedPlayer.syncCosmetics();
-    	}
-    	
-    	extendedPlayer.currentAnimation = 0;
-    	extendedPlayer.setProning(false);
-    	
     }
     
     @SubscribeEvent
@@ -1044,78 +952,8 @@ public class EventsListener {
 		PlayerCachedData.clearDatas();
     }
     
-
-    @SubscribeEvent
-    public void onHurt(LivingHurtEvent e)
-    {
-    	if(!e.entityLiving.worldObj.isRemote)
-    	{
-	    	if(e.entityLiving instanceof EntityPlayer) 
-	    	{
-	    		
-	    		EntityPlayer victim = (EntityPlayer) e.entityLiving;
-	    		
-	    		Entity source = e.source.getEntity();
-	
-	    		
-	    		ExtendedPlayer vData = ExtendedPlayer.get(victim);
-	    		//PlayerCachedData cachedData = PlayerCachedData.getData(victim); 
-	    			
-	    		
-		        /*if(cachedData == null)
-		        {
-		        	e.setCanceled(true);
-		        	return;
-		        }*/
-		        
-		        if(vData.isSleeping() && !vData.shouldBeInEthylicComa())
-		        {
-		        	ExtendedPlayer.forceWakeupPlayer(victim);
-		        }
-		        
-	    	}	
-    	}
-    }
-    
-
-    @SubscribeEvent
-    public void onDamage(LivingAttackEvent event)
-    {
-    	if(event.source == null || event.source.getEntity() == null) return;
-
-    	
-    	if(!event.source.getEntity().worldObj.isRemote)
-    	{
-
-        	if(event.source.getEntity() instanceof EntityPlayer)
-        	{
-        		
-        		EntityPlayer attacker = (EntityPlayer)event.source.getEntity();
-    	        //PlayerCachedData data = PlayerCachedData.getData(attacker);
-    	        ExtendedPlayer data = ExtendedPlayer.get(attacker);
- 
-        		
-    	        if(data == null)
-    	        {
-    	        	event.setCanceled(true);
-    	        	return;
-    	        } 
-    	        
-    	        if(data.currentAnimation != 0)
-    	        {
-    	        	event.setCanceled(true);
-    	        }
-    	        
-        		if(!data.passwordReceived)
-        		{
-            		event.setCanceled(true);
-        		}
-        		
-
-        		
-        	}
-    	}
-    }
+  
+   
     
     
     @SubscribeEvent
@@ -1146,9 +984,10 @@ public class EventsListener {
     @SubscribeEvent
 	public void onContainerOpen(PlayerOpenContainerEvent event)
 	{
+		EntityPlayer player = event.entityPlayer;
+
 		if(!event.entity.worldObj.isRemote)
 		{
-			EntityPlayer player = event.entityPlayer;
 	        //PlayerCachedData data = PlayerCachedData.getData(event.entityPlayer);
 	        ExtendedPlayer data = ExtendedPlayer.get(player);
 
@@ -1298,16 +1137,20 @@ public class EventsListener {
         Minecraft mc = Minecraft.getMinecraft();
         EntityPlayer p = mc.thePlayer;
         ExtendedPlayer extendedPlayer = ExtendedPlayer.get(p);
-    	//PlayerCachedData cachedData = PlayerCachedData.getData(p);
                 
         if(ClientProxy.proningKeyBinding != null && ClientProxy.proningKeyBinding.isPressed())
         {
-        	ClientProxy.proningKeyBinding.unPressAllKeys();
+        	try {
+				Method method = ClientProxy.proningKeyBinding.getClass().getDeclaredMethod("func_74505_d");
+				method.setAccessible(true);
+				method.invoke(ClientProxy.proningKeyBinding);
+        	} catch ( SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
+				e.printStackTrace();
+			}
         	
         	AxisAlignedBB axis = null;
         	
-        	//if(cachedData.isProning()) axis = AxisAlignedBB.getBoundingBox(p.boundingBox.minX, p.boundingBox.minY, p.boundingBox.minZ, p.boundingBox.minX + 0.6F, p.boundingBox.minY + 1.8F, p.boundingBox.minZ + 0.6F);
-        	if(extendedPlayer.isProning()) axis = AxisAlignedBB.getBoundingBox(p.boundingBox.minX, p.boundingBox.minY, p.boundingBox.minZ, p.boundingBox.minX + 0.6F, p.boundingBox.minY + 1.8F, p.boundingBox.minZ + 0.6F);
+        	if(extendedPlayer.isProning()) axis = AxisAlignedBB.getBoundingBox(p.boundingBox.minX, p.boundingBox.minY, p.boundingBox.minZ, p.boundingBox.minX + 0.8F, p.boundingBox.minY + 1.8F, p.boundingBox.minZ + 0.8F);
         	else axis = AxisAlignedBB.getBoundingBox(p.boundingBox.minX, p.boundingBox.minY, p.boundingBox.minZ, p.boundingBox.minX + 0.8F, p.boundingBox.minY + 0.6F, p.boundingBox.minZ + 0.8F);
         	
         	if(MinecraftUtils.boundingBoxCollide(p.worldObj, axis))
@@ -1316,20 +1159,13 @@ public class EventsListener {
         		return;
         	}
         	
-        	if(extendedPlayer.currentAnimation != 0)//if(cachedData.currentAnimation != 0)
+        	if(extendedPlayer.currentAnimation != 0)
         	{
         		ServerUtils.sendChatMessage(mc.thePlayer, "§cVous ne pouvez pas vous baisser actuellement");
         		return;
         	}
         	
-        	/*if(mc.thePlayer.ticksExisted - cachedData.lastProningTick <= 40)
-        	{
-        		ServerUtils.sendChatMessage(mc.thePlayer, "§cAttendez 2 secondes.");
-        		return;
-        	}
-        	cachedData.lastProningTick = mc.thePlayer.ticksExisted;
-        	cachedData.setProning(!cachedData.isProning());*/
-        	
+
         	if(mc.thePlayer.ticksExisted - extendedPlayer.lastProningTick <= 40)
         	{
         		ServerUtils.sendChatMessage(mc.thePlayer, "§cAttendez 2 secondes.");
@@ -1378,12 +1214,7 @@ public class EventsListener {
         		}
         		else if(mc.objectMouseOver.typeOfHit == MovingObjectType.ENTITY)
         		{
-        	
-        			if(mc.objectMouseOver.entityHit instanceof EntitySeat)
-	        		{
-	                      mc.playerController.interactWithEntitySendPacket(mc.thePlayer, mc.objectMouseOver.entityHit);
-	        		}
-	        		else if(Minecraft.getMinecraft().objectMouseOver.entityHit instanceof EntityPlayer)
+        			if(Minecraft.getMinecraft().objectMouseOver.entityHit instanceof EntityPlayer)
 	        		{
 	  		            EntityPlayer target = (EntityPlayer) Minecraft.getMinecraft().objectMouseOver.entityHit;
 	  		            CraftYourLifeRPMod.packetHandler.sendToServer(new PacketOpenCardIdentity(target));		 
@@ -1407,23 +1238,27 @@ public class EventsListener {
         	else
         	{
         		p.addChatMessage(new ChatComponentText("§6Optimisation : §cOFF"));
-        	}
+        	}    
         }
-        /*else if(mc.gameSettings.keyBindSneak.isPressed() && (cachedData.isProning() || extendedPlayer.isSleeping())) 
-        {
-        	mc.gameSettings.keyBindSneak.unPressAllKeys();
-        }
-        else if(mc.gameSettings.keyBindJump.isPressed() && (cachedData.isProning() || extendedPlayer.isSleeping())) 
-        {
-        	mc.gameSettings.keyBindJump.unPressAllKeys();
-        }*/
         else if(mc.gameSettings.keyBindSneak.isPressed() && (extendedPlayer.isProning() || extendedPlayer.isSleeping())) 
         {
-        	mc.gameSettings.keyBindSneak.unPressAllKeys();
+        	try {
+				Method method = mc.gameSettings.keyBindSneak.getClass().getDeclaredMethod("func_74505_d");
+				method.setAccessible(true);
+				method.invoke(mc.gameSettings.keyBindSneak);
+        	} catch ( SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
+				e.printStackTrace();
+			}
         }
         else if(mc.gameSettings.keyBindJump.isPressed() && (extendedPlayer.isProning() || extendedPlayer.isSleeping())) 
         {
-        	mc.gameSettings.keyBindJump.unPressAllKeys();
+        	try {
+				Method method = mc.gameSettings.keyBindJump.getClass().getDeclaredMethod("func_74505_d");
+				method.setAccessible(true);
+				method.invoke(mc.gameSettings.keyBindJump);
+        	} catch ( SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
+				e.printStackTrace();
+			}
         }
         else if((mc.gameSettings.keyBindForward.isPressed() || mc.gameSettings.keyBindBack.isPressed() || mc.gameSettings.keyBindLeft.isPressed() || mc.gameSettings.keyBindRight.isPressed()) && extendedPlayer.isSleeping())
         {
@@ -1439,13 +1274,9 @@ public class EventsListener {
     	if(event.entityLiving instanceof EntityPlayer)
     	{
     		EntityPlayer player = (EntityPlayer) event.entityLiving;
-    		//PlayerCachedData cachedData = PlayerCachedData.getData(player);
     		ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
 
-    		/*if(cachedData.isProning() || extendedPlayer.isSleeping())
-    		{
-    			player.motionY = 0F;
-    		}*/
+    	
     		if(extendedPlayer.isProning() || extendedPlayer.isSleeping())
     		{
     			player.motionY = 0F;
@@ -1458,7 +1289,6 @@ public class EventsListener {
     {
     	if(!event.target.worldObj.isRemote)
     	{
-	
 		    if(event.target instanceof EntityFootballBall)
 		    {
 					if(FMLCommonHandler.instance().getMinecraftServerInstance().getConfigurationManager().func_152596_g(event.entityPlayer.getGameProfile()))
@@ -1482,13 +1312,14 @@ public class EventsListener {
 		    else if(event.target instanceof EntityPlayer)
 		    {
 		    	ItemStack heldItem = event.entityPlayer.getHeldItem();
-		    	if(heldItem != null && heldItem.getItem() == Item.getItemById(280))
+		    	if(heldItem != null)
 		    	{
-		    		if(heldItem.hasDisplayName() && heldItem.getDisplayName().equalsIgnoreCase("Ethylotest"))
+		    		if(heldItem.hasDisplayName() && heldItem.getDisplayName().equalsIgnoreCase("§aEthylotest"))
 		    		{
 		    			ExtendedPlayer targetEP = ExtendedPlayer.get((EntityPlayer)event.target);
 		    			
 		    			ServerUtils.sendChatMessage(event.entityPlayer, "§6Possède §e" + String.format("%.2f", targetEP.getgAlcolInBlood()) + "g §6d'alcool dans le sang");
+		    			event.entityPlayer.inventory.mainInventory[event.entityPlayer.inventory.currentItem] = null;
 		    		}
 		    	}
 		    }
@@ -1501,13 +1332,14 @@ public class EventsListener {
 			    	EntityPlayer targetPlayer = (EntityPlayer)seat.riddenByEntity;
 			    	
 			    	ItemStack heldItem = event.entityPlayer.getHeldItem();
-			    	if(heldItem != null && heldItem.getItem() == Item.getItemById(280))
+			    	if(heldItem != null)
 			    	{
-			    		if(heldItem.hasDisplayName() && heldItem.getDisplayName().equalsIgnoreCase("Ethylotest"))
+			    		if(heldItem.hasDisplayName() && heldItem.getDisplayName().equalsIgnoreCase("§aEthylotest"))
 			    		{
 			    			ExtendedPlayer targetEP = ExtendedPlayer.get(targetPlayer);
 			    			
 			    			ServerUtils.sendChatMessage(event.entityPlayer, "§6Possède §e" + String.format("%.2f", targetEP.getgAlcolInBlood()) + "g §6d'alcool dans le sang");
+			    			event.entityPlayer.inventory.mainInventory[event.entityPlayer.inventory.currentItem] = null;
 			    		}
 			    	}
 		    	}
@@ -1589,6 +1421,13 @@ public class EventsListener {
         	{
         		MinecraftUtils.dropBlockAsItem(event.world, event.x, event.y, event.z, new ItemStack(ModdedItems.nuclearIngot,event.world.rand.nextInt(3)));
         	}
+    		ServerUtils.broadcastMessage("§9[Force de l'ordre] §cLe central nucléaire se fait braquer, des renforts sont demandés", (byte)0);
+    		System.out.println("/wanted add " + event.getPlayer().getCommandSenderName() + " 4");
+    	}
+    	else if(block instanceof BlockNuclear)
+    	{
+    		ServerUtils.broadcastMessage("§9[Force de l'ordre] §cLe central nucléaire se fait braquer, des renforts sont demandés", (byte)0);
+    		System.out.println("/wanted add " + event.getPlayer().getCommandSenderName() + " 4");
     	}
     }
     

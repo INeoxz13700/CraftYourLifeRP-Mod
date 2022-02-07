@@ -19,6 +19,9 @@ import com.flansmod.common.driveables.EntityPlane;
 import com.flansmod.common.driveables.EntityVehicle;
 import com.flansmod.common.driveables.ItemPlane;
 import com.flansmod.common.driveables.ItemVehicle;
+import com.flansmod.common.guns.ItemGrenade;
+import com.flansmod.common.guns.ItemGun;
+import com.flansmod.common.guns.ItemShootable;
 import com.flansmod.common.network.PacketSync;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -43,6 +46,7 @@ import fr.craftyourliferp.data.SmsData;
 import fr.craftyourliferp.data.WorldData;
 import fr.craftyourliferp.entities.EntityFootballBall;
 import fr.craftyourliferp.entities.EntityItemCollider;
+import fr.craftyourliferp.game.events.ReanimationHandler;
 import fr.craftyourliferp.network.PacketAlcol;
 import fr.craftyourliferp.network.PacketBase;
 import fr.craftyourliferp.network.PacketBitcoinPage;
@@ -58,11 +62,13 @@ import fr.craftyourliferp.network.PacketThirst;
 import fr.craftyourliferp.penalty.Penalty;
 import fr.craftyourliferp.penalty.PenaltyManager;
 import fr.craftyourliferp.penalty.VehiclePenalty;
+import fr.craftyourliferp.phone.NetworkCallTransmitter;
 import fr.craftyourliferp.phone.web.page.BMGPage;
 import fr.craftyourliferp.phone.web.page.BitcoinConverterPage;
 import fr.craftyourliferp.phone.web.page.WebPageData;
 import fr.craftyourliferp.shield.ShieldStats;
 import fr.craftyourliferp.thirst.ThirstStats;
+import fr.craftyourliferp.utils.ICallback;
 import fr.craftyourliferp.utils.MathsUtils;
 import fr.craftyourliferp.utils.MinecraftUtils;
 import fr.craftyourliferp.utils.ServerUtils;
@@ -91,6 +97,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.EntityInteractEvent;
 
 public class ExtendedPlayer implements IExtendedEntityProperties {
 
@@ -155,18 +162,15 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
     
     public int tickAlcol;
     
-    public List<UUID> petsOwned = new ArrayList<UUID>();
+    public HashMap<UUID, ChunkCoordinates> petsOwned = new HashMap<UUID, ChunkCoordinates>();
         
     public int sleepingTime;
     
     private boolean isSleeping;
     
     public double sleepX, sleepY, sleepZ;
-    
-    public String reanimatorPlayerName;
-    
+            
 	public PlayerAnimator currentPlayingAnimation;
-	
 	
 	public int lastProningTick;
 	private boolean proning = false;
@@ -209,6 +213,21 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 	public EntityItemCollider entityItemCollider;
 	
 	private List<WorldSelector> capturingRegions = new ArrayList();
+		
+	public List<String> currentRegions = new ArrayList();
+	
+	private Object callbackCheckIfDoctor;
+	
+	private boolean shouldBeReanimate = false;
+	
+	public long startTimeTimestamp = 0;
+	public long lastIdentityResetTime = 0;
+	public int reanimationTick = 0;
+	
+	public String reanimatingPlayername;
+		
+	public static final int identityResetTimeInSeconds = 60*60*24*7;
+
 
     public ExtendedPlayer(EntityPlayer player) 
     {    	
@@ -261,17 +280,25 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
     	properties.setFloat("gAlcolInBlood", gAlcolInBlood);
     	properties.setBoolean("isSleeping", isSleeping);
     	properties.setInteger("SleepingTime", sleepingTime);
-    	if(reanimatorPlayerName != null) properties.setString("reanimatorPlayerName", reanimatorPlayerName);
     	
     	properties.setDouble("SleepingX", sleepX);
     	properties.setDouble("SleepingY", sleepY);
     	properties.setDouble("SleepingZ", sleepZ);
+    	
+    	properties.setBoolean("ShouldBeReanimate", shouldBeReanimate);
+    	properties.setLong("StartTimeTimestamp", startTimeTimestamp);
+    	properties.setLong("LastIdentityResetTime", lastIdentityResetTime);
+
 
     	NBTTagList petsList = new NBTTagList();
-    	for(UUID uuid : petsOwned)
+    	for(Map.Entry<UUID, ChunkCoordinates> uuid : petsOwned.entrySet())
     	{
     		NBTTagCompound petCompound = new NBTTagCompound();
-    		petCompound.setString("PetUUID", uuid.toString());
+    		petCompound.setString("PetUUID", uuid.getKey().toString());
+    		petCompound.setInteger("x", uuid.getValue().posX);
+    		petCompound.setInteger("y", uuid.getValue().posY);
+    		petCompound.setInteger("z", uuid.getValue().posZ);
+    		petsList.appendTag(petCompound);
     	}
     	properties.setTag("OwnedPets", petsList);
     	
@@ -401,20 +428,31 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
         gAlcolInBlood = properties.getFloat("gAlcolInBlood");
     	isSleeping = properties.getBoolean("isSleeping");
     	sleepingTime = properties.getInteger("SleepingTime");
-    	reanimatorPlayerName = properties.getString("reanimatorPlayerName");
 
     	sleepX = properties.getDouble("SleepingX");
     	sleepY = properties.getDouble("SleepingY");
     	sleepZ = properties.getDouble("SleepingZ");
         
-    	NBTTagList petsList =  (NBTTagList) properties.getTag("OwnedPets");
+    	setShouldBeReanimate(properties.getBoolean("ShouldBeReanimate"));
+    	startTimeTimestamp = properties.getLong("StartTimeTimestamp");
+    	lastIdentityResetTime = properties.getLong("LastIdentityResetTime");
+
+    	
+    	NBTTagList petsList = (NBTTagList) properties.getTag("OwnedPets");
+
     	if(petsList != null)
     	{
 	    	for(int i = 0; i < petsList.tagCount(); i++)
-	    	{
+	    	{    		
 	    		NBTTagCompound itemstackCompound = petsList.getCompoundTagAt(i);
 	    		UUID uuid = UUID.fromString(itemstackCompound.getString("PetUUID"));
-	    		petsOwned.add(uuid);
+	    		if(!itemstackCompound.hasKey("x"))
+	    		{
+	    			continue;
+	    		}
+	    		ChunkCoordinates chunkCoordinates = new ChunkCoordinates(itemstackCompound.getInteger("x"), itemstackCompound.getInteger("y"), itemstackCompound.getInteger("z"));
+
+	    		petsOwned.put(uuid,chunkCoordinates);
 	    	}  	
     	}
         
@@ -608,19 +646,6 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
     
     public void syncMoney()
     {
-    	/*if(!player.worldObj.isRemote)
-    	{
-    		PlayerCachedData tempData = PlayerCachedData.getData(player);
-    		if(this.phoneData != null)
-    		{
-    			CraftYourLifeRPMod.packetHandler.sendTo(PacketBitcoinPage.syncPlayerMoney(bitcoin,(float)tempData.serverData.money), (EntityPlayerMP)player);
-    		}
-    	}
-    	else
-    	{
-			CraftYourLifeRPMod.packetHandler.sendToServer(PacketBitcoinPage.syncPlayerMoney(bitcoin,0));
-    	}*/
-    	
     	if(!player.worldObj.isRemote)
     	{
     		ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
@@ -653,6 +678,14 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
     	if(!player.worldObj.isRemote)
     	{
     		CraftYourLifeRPMod.packetHandler.sendTo(PacketAlcol.syncAlcol(gAlcolInBlood),(EntityPlayerMP) player);
+    	}
+    }
+    
+    public void syncShouldBeReanimate()
+    {
+    	if(!player.worldObj.isRemote)
+    	{
+    		CraftYourLifeRPMod.packetHandler.sendTo(PacketSleeping.syncShouldBeReanimate(shouldBeReanimate),(EntityPlayerMP) player);
     	}
     }
     
@@ -819,20 +852,105 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		}
 	}
 	
-	public void onRespawnPlayerSpigot() //Used by reanimation system from spigot
+	public void onReanimationEnter()
 	{
-		/*PlayerCachedData cachedData  =PlayerCachedData.getData(player);
-		cachedData.currentAnimation = 0;
-		cachedData.setProning(false);
-		shield.setShield(ShieldStats.initialShield);
-		thirst.setThirst(ThirstStats.initialThirst);
-		updateRendererDatas();*/
+		reanimatingPlayername = null;
+		setShouldBeReanimate(true);
+		startTimeTimestamp = System.currentTimeMillis();
 		
-		ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
-		extendedPlayer.currentAnimation = 0;
-		extendedPlayer.setProning(false);
+		System.out.println("/wanted remove " + player.getCommandSenderName());
+
+		NetworkCallTransmitter activeCall = NetworkCallTransmitter.getByUsername(player.getCommandSenderName());
+		if(activeCall != null)
+		{
+			activeCall.finishCall();
+		}
+		
+		clearInventoryInReanimation();
+	}
+	
+	public void onReanimated() //Used by reanimation system
+	{		
+		setShouldBeReanimate(false);
+		currentAnimation = 0;
+		setgAlcolInBlood(0F);
+		player.clearActivePotions();
+		player.extinguish();
+
+		player.setHealth(10);
+		player.getFoodStats().addStats(10, 5F);
+		setProning(false);
+
+		ExtendedPlayer.forceWakeupPlayer(player);
+		
 		shield.setShield(ShieldStats.initialShield);
 		thirst.setThirst(ThirstStats.initialThirst);
+		
+		
+		player.setPositionAndUpdate(1428, 71, -807);
+	}
+	
+	public void onRespawn()
+	{
+		setShouldBeReanimate(false);
+		currentAnimation = 0;
+		setgAlcolInBlood(0F);
+		player.extinguish();
+		player.clearActivePotions();
+		heal();
+
+		setProning(false);
+		ExtendedPlayer.forceWakeupPlayer(player);
+		clearInventory();
+	}
+	
+	public void heal()
+	{
+		player.setHealth(20);
+		player.getFoodStats().addStats(20, 5F);
+		shield.setShield(ShieldStats.initialShield);
+		thirst.setThirst(ThirstStats.initialThirst);
+	}
+	
+	public void clearInventory()
+	{
+		for(int i = 0; i < player.inventory.mainInventory.length; i++)
+		{
+			ItemStack is = player.inventory.mainInventory[i];
+			
+			if(is == null) continue;
+			
+			if(ReanimationHandler.itemsToNotRemove.contains(Item.getIdFromItem(is.getItem())))
+			{
+				continue;
+			}
+			
+			player.inventory.mainInventory[i] = null;
+		}
+		
+		for(int i = 0; i < player.inventory.armorInventory.length; i++)
+		{
+			ItemStack is = player.inventory.armorInventory[i];
+			
+			if(is == null) continue;
+			
+			player.inventory.armorInventory[i] = null;
+		}
+	}
+	
+	public void clearInventoryInReanimation()
+	{
+		for(int i = 0; i < player.inventory.mainInventory.length; i++)
+		{
+			ItemStack is = player.inventory.mainInventory[i];
+			
+			if(is == null) continue;
+			
+			if(ReanimationHandler.itemsToForceRemoveOnReanimation.contains(Item.getIdFromItem(is.getItem())))
+			{
+				player.inventory.mainInventory[i] = null;
+			}
+		}
 	}
 	
 	public void setVcoins(int value) {
@@ -953,17 +1071,31 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 	    	}
 	 }
 	 
-	 public float getgAlcolInBlood()
-	 {
-		 return this.gAlcolInBlood;
-	 }
+	public void setShouldBeReanimate(boolean shouldBeReanimate)
+	{
+		this.shouldBeReanimate = shouldBeReanimate;
+		if(!player.worldObj.isRemote)
+		{
+			syncShouldBeReanimate();
+		}
+	}
+	
+	public boolean getShouldBeReanimate()
+	{
+		return shouldBeReanimate;
+	}
 	 
-	 public boolean shouldBeInEthylicComa()
-	 {
-		 return this.gAlcolInBlood >= 4f;
-	 }
+	public float getgAlcolInBlood()
+	{
+		return this.gAlcolInBlood;
+	}
 	 
-	 public static boolean forcePlayerSleep(EntityPlayer player, int x, int y, int z)
+	public boolean shouldBeInEthylicComa()
+	{
+		return this.gAlcolInBlood >= 4f;
+	}
+	 
+	 public static boolean forcePlayerSleep(EntityPlayer player, int x, int y, int z, boolean serverForce)
 	 {
 		 World world = player.worldObj;
 	     if (world.isRemote)
@@ -987,22 +1119,20 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
              i1 = world.getBlockMetadata(x, y, z);             
          }
 		 
-
-         EntityPlayer.EnumStatus enumstatus = sleepPlayerAt(player,x, y, z);
+		 if(serverForce) player.setPositionAndUpdate(x, y, z);
+         EntityPlayer.EnumStatus enumstatus = sleepPlayerAt(player,x, y, z, serverForce);
 
          if (enumstatus == EntityPlayer.EnumStatus.OK)
          {
         	 CraftYourLifeRPMod.entityTrackerHandler.syncPlayerToPlayers(player, true, PacketSleeping.syncSleeping(player.getEntityId(), x, y, z, BlockBed.getDirection(i1)));
              return true;
          }
-         else
+         else if(enumstatus == EntityPlayer.EnumStatus.TOO_FAR_AWAY)
          {
-             if (enumstatus == EntityPlayer.EnumStatus.NOT_POSSIBLE_NOW)
-             {
-         	 }
-
-             return true;
+        	 ServerUtils.sendChatMessage(player, "§cApprochez-vous du lit pour interagir avec.");
+        	 return false;
          }
+         return false;
 	 }
 	 
 	 @SideOnly(Side.CLIENT)
@@ -1076,7 +1206,7 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		  return EntityPlayer.EnumStatus.OK;
 		}
 	 
-	 public static EnumStatus sleepPlayerAt(EntityPlayer player, int x, int y, int z)
+	 public static EnumStatus sleepPlayerAt(EntityPlayer player, int x, int y, int z , boolean serverForce)
 	 {		   
 		 ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
 	     World world = player.worldObj;
@@ -1097,7 +1227,9 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 			             if (extendedPlayer2.isSleeping())
 			             {
 			            	 ChunkCoordinates chunkcoordinates = entityplayer2.playerLocation;
-	
+			            	 
+			            	 if(chunkcoordinates == null) continue;
+			            	 
 			                 if (chunkcoordinates.posX == x && chunkcoordinates.posY == y && chunkcoordinates.posZ == z)
 			                 {
 			                	 entityplayer1 = entityplayer2;
@@ -1126,9 +1258,12 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		    }
 
 
-		    if (Math.abs(player.posX - (double)x) > 3.0D || Math.abs(player.posY - (double)y) > 2.0D || Math.abs(player.posZ - (double)z) > 3.0D) //distance
+		    if(!serverForce)
 		    {
-		    	return EntityPlayer.EnumStatus.TOO_FAR_AWAY;
+			    if (Math.abs(player.posX - (double)x) > 5.0D || Math.abs(player.posY - (double)y) > 3.0D || Math.abs(player.posZ - (double)z) > 5.0D) //distance
+			    {
+			    	return EntityPlayer.EnumStatus.TOO_FAR_AWAY;
+			    }
 		    }
 		 }
 		      		 
@@ -1231,9 +1366,9 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 	 	public static boolean wakeUpPlayer(EntityPlayer player)
 	    {
 	        ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
-	        if(extendedPlayer.shouldBeInEthylicComa())
+	        if(!CraftYourLifeRPMod.reanimationHandler.canWakeupFromBed(player))
 	        {
-	        	if(!player.worldObj.isRemote)ServerUtils.sendMessage("§cVous êtes en coma!", player, 100, 0);
+	        	if(!player.worldObj.isRemote) ServerUtils.sendMessage("§cVous êtes en réanimation!", player, 100, 0);
 	        	return false;
 	        }
 	        
@@ -1432,5 +1567,17 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		{
 			return capturingRegions;
 		}
+		
+		public void setCallbackCheckIfDoctor(Object object)
+		{
+			callbackCheckIfDoctor = object;
+		}
+		
+		public Object getCallbackCheckIfDoctor()
+		{
+			return callbackCheckIfDoctor;
+		} 
+		
+
 
 }

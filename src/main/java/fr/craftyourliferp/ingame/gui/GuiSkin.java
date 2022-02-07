@@ -5,8 +5,11 @@ import java.awt.Frame;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -33,6 +36,7 @@ import fr.craftyourliferp.utils.GuiUtils;
 import fr.craftyourliferp.utils.HTTPUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
 
@@ -409,5 +413,16 @@ public class GuiSkin extends GuiBase {
 		CraftYourLifeRPMod.packetHandler.sendToServer(packet);
 	}
 	
+	 @Override
+	 protected void keyTyped(char character, int keycode)
+	 {
+	    if (keycode == 1)
+	    {
+	            this.mc.displayGuiScreen((GuiScreen)null);
+	            this.mc.setIngameFocus();
+	            return;
+	    }
+		super.keyTyped(character, keycode);
+	 }
 	
 }

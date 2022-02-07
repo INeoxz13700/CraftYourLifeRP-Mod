@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.flansmod.common.FlansMod;
 import com.flansmod.common.network.PacketOpenGui;
@@ -26,6 +27,7 @@ import fr.craftyourliferp.network.PacketHandler;
 import fr.craftyourliferp.network.PacketMessageDisplay;
 import fr.craftyourliferp.network.PacketSleeping;
 import fr.craftyourliferp.utils.ServerUtils;
+import fr.craftyourliferp.utils.StringUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBed;
 import net.minecraft.block.BlockChest;
@@ -39,12 +41,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
+import net.minecraftforge.event.entity.player.EntityInteractEvent;
 import fr.craftyourliferp.data.PlayerData;
 
 public class CommandApi implements ICommand {
@@ -108,9 +112,17 @@ public class CommandApi implements ICommand {
 	    					playerTempData.openPage().updatePageData();
 	    				}
     					
+	    				if(playerTempData.getCallbackCheckIfDoctor() != null)
+	    				{
+	    					if(playerTempData.getCallbackCheckIfDoctor() instanceof EntityInteractEvent)
+	    					{
+	    						CraftYourLifeRPMod.reanimationHandler.onDoctorInteractPlayerPost((EntityInteractEvent)playerTempData.getCallbackCheckIfDoctor());
+	    						playerTempData.setCallbackCheckIfDoctor(null);
+	    					}
+	    				}
     				}
     			}
-    			else if(args[0].equalsIgnoreCase("cadavre"))
+    			/*else if(args[0].equalsIgnoreCase("cadavre"))
     			{
     				if(args[1].equalsIgnoreCase("spawn"))
     				{
@@ -132,8 +144,40 @@ public class CommandApi implements ICommand {
 						player.worldObj.spawnEntityInWorld(corpse);
 						corpse.setRotation(rotation);
     				}
+    			}*/
+    			else if(args[0].equalsIgnoreCase("identity"))
+    			{
+    				EntityPlayerMP player = (EntityPlayerMP)world.getPlayerEntityByName(args[1]);
+    				if(player == null)
+    				{
+    					ServerUtils.sendChatMessage(sender, "§cCe joueur n'existe pas ou n'est pas connecté");
+    					return;
+    				}
+    				ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
+    				int elapsedTimeInSeconds = (int)((System.currentTimeMillis() - extendedPlayer.lastIdentityResetTime) / 1000f);
+    				if(elapsedTimeInSeconds >= ExtendedPlayer.identityResetTimeInSeconds)
+    				{
+    					extendedPlayer.lastIdentityResetTime = System.currentTimeMillis();
+    					extendedPlayer.identityData.name = null;
+    					player.playerNetServerHandler.kickPlayerFromServer("§cChangez de nom RP!");
+    				}
+    				else
+    				{
+    					int leftTime = ExtendedPlayer.identityResetTimeInSeconds - elapsedTimeInSeconds;
+    					ServerUtils.sendChatMessage(player, "§cVous pouvez de nouveau changer d'identité dans §e" + leftTime);
+    					ServerUtils.sendChatMessage(player, "§eseconde(s)");
+    				}
     			}
-    			else if(args[0].equalsIgnoreCase("respawn"))
+    			/*else if(args[0].equalsIgnoreCase("vehicle"))
+    			{
+    				String vehicleName = args[1];
+    				int x = Integer.parseInt(args[2]);
+    				int y = Integer.parseInt(args[3]);
+    				int z = Integer.parseInt(args[4]);
+
+    				
+    			}*/
+    			else if(args[0].equalsIgnoreCase("heal"))
     			{
     				String playerName = args[1];
     				
@@ -141,7 +185,7 @@ public class CommandApi implements ICommand {
 
 					if(player == null) return;
 					
-					ExtendedPlayer.get(player).onRespawnPlayerSpigot();
+					ExtendedPlayer.get(player).heal();
     			}
     			else if(args[0].equalsIgnoreCase("explosion"))
     			{
@@ -437,6 +481,19 @@ public class CommandApi implements ICommand {
     				String base64String = args[1];
     				ServerUtils.sendChatMessage(sender, "§6Pseudo du joueur : §e" + new String(Base64.getDecoder().decode(base64String)));
     			}
+    			else if(args[0].equalsIgnoreCase("bed"))
+    			{
+    				if(args[1].equalsIgnoreCase("count"))
+    				{
+        				ServerUtils.sendChatMessage(sender, "§dNombre de chambres : §4" + data.hospitalBeds.size());
+    				}
+    				else if(args[1].equalsIgnoreCase("clear"))
+    				{
+    					data.hospitalBeds.clear();
+    					data.markDirty();
+        				ServerUtils.sendChatMessage(sender, "§aTout les chambres ont étaient éffacés.");
+    				}
+    			}
     			else if(args[0].equalsIgnoreCase("bitcoin"))
     			{
     				if(args.length >= 3)
@@ -475,56 +532,76 @@ public class CommandApi implements ICommand {
         				}
     				}
     			}
-    			else if(args[0].equalsIgnoreCase("ethylic"))
+    			else if(args[0].equals("region"))
     			{
-    				if(args.length >= 6)
+    				if(args[1].isEmpty())
     				{
-    					EntityPlayer doctorPlayer = world.getPlayerEntityByName(args[1]);
-    					EntityPlayer victimPlayer = world.getPlayerEntityByName(args[2]);
-    					int x = Integer.parseInt(args[3]);
-    					int y = Integer.parseInt(args[4]);
-    					int z = Integer.parseInt(args[5]);
-    					
-    					if(doctorPlayer == null || victimPlayer == null) 
+    					return;
+    				}
+    				
+    				EntityPlayer player = world.getPlayerEntityByName(args[1]);
+    				if(player == null)
+    				{
+    					return;
+    				}
+    				
+					List<String> rgs = new ArrayList<String>();
+    				if(args[2].equals("enter"))
+    				{
+    					for(String rg : args[3].split("#SEP#"))
     					{
-    						ServerUtils.sendChatMessage(doctorPlayer, "§cJoueur introuvable");
-    						return;
+    						rgs.add(rg);
     					}
-
-    					ExtendedPlayer expVictim = ExtendedPlayer.get(victimPlayer);
-    					if(expVictim.shouldBeInEthylicComa())
+    					CraftYourLifeRPMod.regionHandler.onRegionEnter(player, rgs);
+    				}
+    				else if(args[2].equals("exit"))
+    				{
+    					for(String rg : args[3].split("#SEP#"))
     					{
-    						Block block = doctorPlayer.worldObj.getBlock(x, y, z);
-    						if(block instanceof BlockBed)
-    						{	   
-    							System.out.println(expVictim.reanimatorPlayerName);
-    							if(expVictim.reanimatorPlayerName == null || expVictim.reanimatorPlayerName.isEmpty())
-    							{
-           							if(ExtendedPlayer.forcePlayerSleep(victimPlayer, x, y, z))
-        							{
-            							expVictim.reanimatorPlayerName = doctorPlayer.getCommandSenderName();
-            							ServerUtils.sendChatMessage(victimPlayer, "§eLes frais d'hospitalisation vous ont coûté §6100 euro");
-        								ServerUtils.sendChatMessage(doctorPlayer, "§eVous avez reçu §6100 euro!");
-        								ServerUtils.addMoney(doctorPlayer, 100F);
-        								ServerUtils.takeMoney(victimPlayer, 100F);
-        							}
-        							else
-        							{
-        								ServerUtils.sendChatMessage(doctorPlayer, "§cCe lit est occupé");
-        							}
-    							}
-    							else
-    							{
-    								ServerUtils.sendChatMessage(doctorPlayer, "§cCe joueur est déjà en réanimation");
-    							}
+    						rgs.add(rg);
+    					}
+    					CraftYourLifeRPMod.regionHandler.onRegionExit(player, rgs);
+    				}
+    			}
+    			else if(args[0].equalsIgnoreCase("pet"))
+    			{
+    				if(args[1].equalsIgnoreCase("find"))
+    				{
+    					EntityPlayer player = world.getPlayerEntityByName(args[2]);
+    					if(player != null)
+    					{
+    						ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
+    						
+    						if(extendedPlayer.petsOwned.size() == 0)
+    						{
+        						ServerUtils.sendChatMessage(player, "§cVous n'avez pas d'animaux");
+        						return;
+    						}
+    						else if(extendedPlayer.petsOwned.size() == 1)
+    						{
+        						ServerUtils.sendChatMessage(player, "§aVous avez §e" + extendedPlayer.petsOwned.size() + " §aAnimal");
+    						}
+    						else
+    						{
+        						ServerUtils.sendChatMessage(player, "§aVous avez §e" + extendedPlayer.petsOwned.size() + " §aAnimaux");
+    						}
+    						
+    						ServerUtils.sendChatMessage(player, "§aIl(s) se trouve(nt) aux coordonnées :"); 
+    						for(Map.Entry<UUID, ChunkCoordinates> map : extendedPlayer.petsOwned.entrySet())
+    						{
+        						ServerUtils.sendChatMessage(player, "§b" + map.getValue().posX + " " + map.getValue().posY + " " + map.getValue().posZ); 
     						}
     					}
-    					else
+    				}
+    				else if(args[1].equalsIgnoreCase("reset"))
+    				{
+    					EntityPlayer player = world.getPlayerEntityByName(args[2]);
+    					if(player != null)
     					{
-    						ServerUtils.sendChatMessage(doctorPlayer, "§cCe joueur n'a pas d'intoxication d'alcool");
+    						ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
+    						extendedPlayer.petsOwned.clear();
+    						ServerUtils.sendChatMessage(sender, "§aLes animaux de §c" + player.getCommandSenderName() + " §aont bien étaient clear!");
     					}
-    					
-    					
     				}
     			}
     			/*else if(args[0].equalsIgnoreCase("effect"))

@@ -79,10 +79,13 @@ import fr.craftyourliferp.entities.renderer.RenderSkinnedBody;
 import fr.craftyourliferp.entities.renderer.RenderStopStick;
 import fr.craftyourliferp.game.events.CollisionListener;
 import fr.craftyourliferp.game.events.EventsListener;
-import fr.craftyourliferp.game.events.GuiContainerHandler;
 import fr.craftyourliferp.game.events.MouseListener;
+import fr.craftyourliferp.game.events.NuclearCentralEvent;
 import fr.craftyourliferp.game.events.OverlayRendererListener;
+import fr.craftyourliferp.game.events.PlayerInventoryHandler;
 import fr.craftyourliferp.game.events.PlayerItemInteractionListener;
+import fr.craftyourliferp.game.events.PlayerLifeHandler;
+import fr.craftyourliferp.game.events.ReanimationHandler;
 import fr.craftyourliferp.game.events.RendererListener;
 import fr.craftyourliferp.game.events.TicksHandler;
 import fr.craftyourliferp.ingame.gui.CylrpMessageHUD;
@@ -229,8 +232,23 @@ public class ClientProxy extends CommonProxy {
         
       	FMLCommonHandler.instance().bus().register(CraftYourLifeRPMod.captureHander);
         MinecraftForge.EVENT_BUS.register(CraftYourLifeRPMod.captureHander); 
+        
+        PlayerInventoryHandler inventoryHandler = new PlayerInventoryHandler();
+        FMLCommonHandler.instance().bus().register(inventoryHandler);
+        MinecraftForge.EVENT_BUS.register(inventoryHandler); 
+        
+        ReanimationHandler reanimationHandler = CraftYourLifeRPMod.reanimationHandler;
+        FMLCommonHandler.instance().bus().register(reanimationHandler);
+        MinecraftForge.EVENT_BUS.register(reanimationHandler); 
+        
+        PlayerLifeHandler lifeHandler = new PlayerLifeHandler();
+        FMLCommonHandler.instance().bus().register(lifeHandler);
+        MinecraftForge.EVENT_BUS.register(lifeHandler); 
+        
+        NuclearCentralEvent nuclearEvent = new NuclearCentralEvent();
+        FMLCommonHandler.instance().bus().register(nuclearEvent);
+        MinecraftForge.EVENT_BUS.register(nuclearEvent); 
     
-        NetworkRegistry.INSTANCE.registerGuiHandler(CraftYourLifeRPMod.instance, new GuiContainerHandler());
     }
 	
 	public void registerRenderers() 

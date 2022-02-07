@@ -3,18 +3,23 @@ package fr.craftyourliferp.ingame.gui;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import fr.craftyourliferp.data.IdentityData;
+import fr.craftyourliferp.guicomponents.UIColor;
+import fr.craftyourliferp.guicomponents.UIRect;
+import fr.craftyourliferp.guicomponents.UITextField;
 import fr.craftyourliferp.main.CraftYourLifeRPMod;
 import fr.craftyourliferp.main.ExtendedPlayer;
 import fr.craftyourliferp.mainmenu.gui.GuiCustomButton;
 import fr.craftyourliferp.network.PacketAtm;
 import fr.craftyourliferp.network.PacketUpdateIdentity;
 import fr.craftyourliferp.utils.GuiUtils;
+import io.netty.util.internal.ThreadLocalRandom;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiButton;
@@ -39,18 +44,35 @@ public class GuiCharacter extends GuiScreen {
 	private boolean stopEventExecution = false;
 	private List<String> dictatelMessage = new ArrayList<String>();	
 	
-	public GuiTextField lastname;
-	public GuiTextField name;
-	public GuiTextField birthday;
-	public GuiTextField gender;
+	public UITextField lastname;
+	public UITextField name;
+	public UITextField birthdayDay;
+	public UITextField birthdayMonth;
+	public UITextField birthdayYear;
+
+	public UITextField gender;
 	
 	private boolean isError;
 	private String errorMessage;
 	
 	private EntityPlayer p;
 	
+	private String id;
+
+	
 	public GuiCharacter(EntityPlayer p) {
 		this.p = p;
+		Random random = new Random();
+		id = "IDCRAFTYOURL<<<<<<<<<<<<<<<<<<<<";
+		for(int i = 0; i < 18; i++)
+		{
+			id += ThreadLocalRandom.current().nextInt(1, 11);
+		}
+		id += "CYL<<<<<<<<<<<<";
+		for(int i = 0; i < 11; i++)
+		{
+			id += ThreadLocalRandom.current().nextInt(0, 11);
+		}
 		ExtendedPlayer pData = ExtendedPlayer.get(p);
 		isDictatel = true;
 		this.countMessage = true;
@@ -60,48 +82,57 @@ public class GuiCharacter extends GuiScreen {
 		this.dictatelMessage.add("Pour votre arrivée en ville je vous offre ce dont vous avez besoin pour bien débuter , il est temps pour moi de vous laisser à bientôt !");
 	}
 	
+	
 	public void initGui() {
 		this.buttonList.clear();
-		lastname = new GuiTextField(mc.fontRenderer, (this.width / 4) - 50, 60, 100, 20);
-		name = new GuiTextField(mc.fontRenderer, this.width - (this.width / 4) - 50, 60, 100, 20);
-		birthday = new GuiTextField(mc.fontRenderer, (this.width /4)  - 50, 120, 100, 20);
-		gender = new GuiTextField(mc.fontRenderer, this.width - (this.width / 4) - 50, 120, 100, 20);
-		this.buttonList.add(new GuiButton(0,(this.width/2) - 50,this.height - 50, 100,20,"Confirmer"));
+		this.lastname = new UITextField(new UIRect(new UIColor(0,0,0,100)), 1F, UITextField.Type.TEXT);
+		this.lastname.setMaxStringLength(35);
+		this.name = new UITextField(new UIRect(new UIColor(0,0,0,100)), 1F, UITextField.Type.TEXT);
+		this.name.setMaxStringLength(35);
+
+		this.birthdayDay = new UITextField(new UIRect(new UIColor(0,0,0,100)), 1F, UITextField.Type.NUMBER);
+		this.birthdayDay.setMaxStringLength(2);
+		
+		this.birthdayMonth = new UITextField(new UIRect(new UIColor(0,0,0,100)), 1F, UITextField.Type.NUMBER);
+		this.birthdayMonth.setMaxStringLength(2);
+		
+		this.birthdayYear = new UITextField(new UIRect(new UIColor(0,0,0,100)), 1F, UITextField.Type.NUMBER);
+		this.birthdayYear.setMaxStringLength(4);
+		
+		this.gender = new UITextField(new UIRect(new UIColor(0,0,0,100)), 1F, UITextField.Type.TEXT);
+		this.gender.setMaxStringLength(1);
+		
+		this.buttonList.add(new GuiButton(0,(this.width/2) - 50,this.height - 15, 80,15,"Confirmer"));
 	}
 	
 	protected void actionPerformed(GuiButton button) {
 		if(button.id == 0 && !this.isDictatel)
 		{
-			if(this.lastname.getText().isEmpty() || this.name.getText().isEmpty() || this.birthday.getText().isEmpty() || this.gender.getText().isEmpty())
+			if(this.lastname.getText().isEmpty() || this.name.getText().isEmpty() || this.birthdayDay.getText().isEmpty() || this.birthdayMonth.getText().isEmpty() || this.birthdayYear.getText().isEmpty() || this.gender.getText().isEmpty())
 			{
 				this.isError = true;
 				this.errorMessage = "Veuillez remplir tous les champs";
 				return;
 			}
-			else if(!this.gender.getText().equalsIgnoreCase("Masculin") && !this.gender.getText().equalsIgnoreCase("Feminin"))
+			else if(!this.gender.getText().equalsIgnoreCase("M") && !this.gender.getText().equalsIgnoreCase("F"))
 			{
 				this.isError = true;
-				this.errorMessage = "Veuillez entrer un genre valide Ex : Masculin";
+				this.errorMessage = "Veuillez entrer un genre valide Ex : M (Pour masculin)";
 				return;
 			}
-			else if(!(this.birthday.getText().matches("\\d{2}/\\d{2}/\\d{4}"))) {
-				this.isError = true;
-				this.errorMessage = "Veuillez entrer une date de naissance valide Ex : 04/06/1999";
-				return;
-			}
-			else if(Integer.parseInt(this.birthday.getText().split("/")[2]) > Year.now().getValue())
+			else if(Integer.parseInt(birthdayYear.getText()) > Year.now().getValue())
 			{
 				this.isError = true;
-				this.errorMessage = "Votre date de naissance est fausse > 2019";
+				this.errorMessage = "Votre date de naissance est fausse > " + Year.now().getValue();
 				return;
 			}
-			else if(Integer.parseInt(this.birthday.getText().split("/")[1]) < 1 || Integer.parseInt(this.birthday.getText().split("/")[1]) > 12)
+			else if(Integer.parseInt(birthdayMonth.getText()) < 1 || Integer.parseInt(birthdayMonth.getText()) > 12)
 			{
 				this.isError = true;
 				this.errorMessage = "Votre mois de naissance doit être compris entre 1 et 12";
 				return;	
 			}
-			else if(Integer.parseInt(this.birthday.getText().split("/")[0]) < 1 || Integer.parseInt(this.birthday.getText().split("/")[1]) > 31)
+			else if(Integer.parseInt(birthdayDay.getText()) < 1 || Integer.parseInt(birthdayDay.getText()) > 31)
 			{
 				this.isError = true;
 				this.errorMessage = "Votre jour de naissance doit être compris entre 1 et 31";
@@ -109,7 +140,8 @@ public class GuiCharacter extends GuiScreen {
 			}
 			else
 			{
-				CraftYourLifeRPMod.packetHandler.sendToServer(new PacketUpdateIdentity(this.lastname.getText(), this.name.getText(), this.birthday.getText(), this.gender.getText()));
+				String gender = this.gender.getText().equals("M") ? "Masculin" : "Feminin";
+				CraftYourLifeRPMod.packetHandler.sendToServer(new PacketUpdateIdentity(this.lastname.getText(), this.name.getText(), this.birthdayDay.getText() + "/" + this.birthdayMonth.getText() + "/" + this.birthdayYear.getText(), gender));
 				ExtendedPlayer pData = ExtendedPlayer.get(this.p);
 				if(pData.identityData == null)
 				{
@@ -118,8 +150,8 @@ public class GuiCharacter extends GuiScreen {
 					
 				pData.identityData.lastname = this.lastname.getText();
 			    pData.identityData.name = this.name.getText();
-			    pData.identityData.birthday = this.birthday.getText();
-			    pData.identityData.gender = this.gender.getText();
+			    pData.identityData.birthday = this.birthdayDay.getText() + "/" + this.birthdayMonth.getText() + "/" + this.birthdayYear.getText();
+			    pData.identityData.gender = gender;
 				this.dictatelMessage.set(2, "Vous êtes maintenant " + (pData.identityData.gender.equalsIgnoreCase("Masculin") ? "un citoyen" : "une citoyenne") + " de notre ville " + (pData.identityData.gender.equalsIgnoreCase("Masculin") ? "monsieur" : "madame") + " " + pData.identityData.name + " et comme chaque citoyen vous devez à tous pris respecter les lois ne l'oubliez pas."); 
 				   		
         		this.countMessage = true;
@@ -136,10 +168,12 @@ public class GuiCharacter extends GuiScreen {
     {
 		if(!this.isDictatel)
 		{
-			this.name.textboxKeyTyped(ch, key);
-			this.birthday.textboxKeyTyped(ch, key);
-			this.lastname.textboxKeyTyped(ch, key);
-			this.gender.textboxKeyTyped(ch, key);
+			this.name.keyTyped(ch, key);
+			this.birthdayDay.keyTyped(ch, key);
+			this.birthdayMonth.keyTyped(ch, key);
+			this.birthdayYear.keyTyped(ch, key);
+			this.lastname.keyTyped(ch, key);
+			this.gender.keyTyped(ch, key);
 		}
 	}
 	
@@ -152,34 +186,59 @@ public class GuiCharacter extends GuiScreen {
     	}
     	else
     	{
-        	GuiUtils.drawImage(0, 0, new ResourceLocation("craftyourliferp","gui/character/background.png"), width, height);
+    		GuiUtils.drawRect(0, 0, width, height, "#000000", 0.6F);
 			
         	if(this.isError)
         	{
-        		GuiUtils.drawImage(this.width / 6, this.height - this.height / 3, new ResourceLocation("craftyourliferp","gui/mainmenu/errorMessage.png"), (this.width - this.width/6) - this.width / 6, 20);
-    			GL11.glPushMatrix();
-    			float scale = 0.8f;
-    			GL11.glScalef(scale, scale, scale);
-        		GuiUtils.renderCenteredText(this.errorMessage, (int) ((((this.width / 4) + (this.width - this.width/4))/ 2) / scale), (int) (((this.height - this.height / 3) + 7) / scale));
-        		GL11.glPopMatrix();
+        		GuiUtils.drawRect((width-300)/2, ((height-180)/2)+182, 300, 15, "#fc0303", 1f);
+        		GuiUtils.renderCenteredText(this.errorMessage, width/2, (int) ((((height-180)/2)+185)));
         	}
 			
         	
-        	GuiUtils.renderCenteredText("Bienvenue sur CraftYourLifeRP !", this.width / 2, 10);
-        	this.name.drawTextBox();
-			this.birthday.drawTextBox();
-			this.lastname.drawTextBox();
-			this.gender.drawTextBox();
+        	GuiUtils.renderCenteredText("Créer votre identité !", this.width / 2, 10);
+        	
+        	GuiUtils.drawImage((width-300)/2, (height-180)/2, new ResourceLocation("craftyourliferp", "gui/cardidentity/background.png"), 300, 180 );
+	    	GuiUtils.drawImage((width-300)/2, (height-180)/2, new ResourceLocation("craftyourliferp", "gui/cardidentity/logo.png"), 300, 30);
+	    	
+	    	GuiUtils.drawImage(((width-300)/2) + 5, ((height-180)/2)+35, new ResourceLocation("craftyourliferp", "gui/cardidentity/container.png"), 225, 115);
+        	
+			GuiUtils.renderTextWithShadow("Nom : ", ((width-300)/2) + 10, ((height-180)/2)+60);
+    		GuiUtils.renderTextWithShadow("Prenom : ", ((width-300)/2) + 10, ((height-180)/2)+80);
+    		GuiUtils.renderTextWithShadow("Genre (M/F) : ", ((width-300)/2) + 10, ((height-180)/2)+100);
+    		GuiUtils.renderTextWithShadow("Date de naissance : ", ((width-300)/2) + 10, ((height-180)/2)+120);
+    		
+    		this.name.setPosition(((width-300)/2) + 45, ((height-180)/2)+57, 100, 15);
+        	this.name.draw(x, y);
+        	
+    		this.lastname.setPosition(((width-300)/2) + 62, ((height-180)/2)+77, 100, 15);
+			this.lastname.draw(x, y);
+
+			this.gender.setInputInset(5);
+    		this.gender.setPosition(((width-300)/2) + 85, ((height-180)/2)+97, 20, 15);
+			this.gender.draw(x, y);
+
+			this.birthdayDay.setInputInset(3);
+    		this.birthdayDay.setPosition(((width-300)/2) + 115, ((height-180)/2)+117, 22, 15);
+    		this.birthdayDay.draw(x, y);
+    		GuiUtils.renderTextWithShadow("/", ((width-300)/2) + 140, ((height-180)/2)+120);
+
+			this.birthdayMonth.setInputInset(3);
+    		this.birthdayMonth.setPosition(((width-300)/2) + 148, ((height-180)/2)+117, 22, 15);
+    		this.birthdayMonth.draw(x, y);
+    		GuiUtils.renderTextWithShadow("/", ((width-300)/2) + 174, ((height-180)/2)+120);
+    		
+			this.birthdayYear.setInputInset(3);
+    		this.birthdayYear.setPosition(((width-300)/2) + 183, ((height-180)/2)+117, 34, 15);
+    		this.birthdayYear.draw(x, y);
 			
 			for(Object obj : this.buttonList)
 			{
 				((GuiButton) obj).drawButton(mc, x, y);
 			}
 			
-			GuiUtils.renderCenteredText("Prenom", this.width / 4, 45);
-			GuiUtils.renderCenteredText("Nom", this.width - (this.width / 4), 45);
-			GuiUtils.renderCenteredText("Date de naissance (JJ/MM/AAAA)", this.width / 4, 105);
-			GuiUtils.renderCenteredText("Genre (Masculin/Feminin) ", this.width - (this.width / 4), 105);
+
+	    	mc.fontRenderer.drawSplitString(this.id, ((width-300)/2)+5, ((height-180)/2)+155, 295, 0);
+
     	}
     }
     
@@ -197,24 +256,24 @@ public class GuiCharacter extends GuiScreen {
 		        }
 		        else
 		        {
-		        			        		
-		    	if(this.messageIndex == 1)
-		    	{
-		    	   this.isDictatel = false;
-		    	    return;
-		    	}
-		    	else if(this.messageIndex == 3)
-		    	{
-		    	    this.isDictatel = false;
-		    	    this.mc.currentScreen = null;
-		    	    this.mc.setIngameFocus();
-		    	    return;
-		    	}
-		    	    	
-		        this.messageIndex++;
-		        this.messageCounter = 0;
-		        this.countMessage = true;	
-		    }
+		        	
+		    		        		
+			    	if(this.messageIndex == 1)
+			    	{
+			    	   this.isDictatel = false;
+			    	    return;
+			    	}
+			    	else if(this.messageIndex == 3)
+			    	{
+			    	    this.isDictatel = false;
+			    	    this.mc.displayGuiScreen(new GuiSkin());
+			    	    return;
+			    	}
+			    	    	
+			        this.messageIndex++;
+			        this.messageCounter = 0;
+			        this.countMessage = true;	
+		        }
 	    		
 	       }  	
     	}
@@ -222,10 +281,12 @@ public class GuiCharacter extends GuiScreen {
     	{
     	   	if (btn == 0)
         	{
-        		this.name.mouseClicked(x, y, btn);
-        		this.birthday.mouseClicked(x, y, btn);
-        		this.lastname.mouseClicked(x, y, btn);
-        		this.gender.mouseClicked(x, y, btn);
+        		this.name.onLeftClick(x, y);
+        		this.birthdayDay.onLeftClick(x, y);
+        		this.birthdayMonth.onLeftClick(x, y);
+        		this.birthdayYear.onLeftClick(x, y);
+        		this.lastname.onLeftClick(x, y);
+        		this.gender.onLeftClick(x, y);
         	}
     	}
     	super.mouseClicked(x, y, btn);
@@ -254,7 +315,9 @@ public class GuiCharacter extends GuiScreen {
     	else
     	{
     		this.name.updateCursorCounter();
-    		this.birthday.updateCursorCounter();
+    		this.birthdayDay.updateCursorCounter();
+    		this.birthdayMonth.updateCursorCounter();
+    		this.birthdayYear.updateCursorCounter();
     		this.lastname.updateCursorCounter();
     		this.gender.updateCursorCounter();
     	}

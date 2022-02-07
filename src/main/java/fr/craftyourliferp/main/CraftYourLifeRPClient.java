@@ -9,9 +9,15 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Map;
 
+import com.google.gson.JsonSyntaxException;
+
 import fr.craftyourliferp.data.PlayerCachedData;
 import fr.craftyourliferp.data.UserSession;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.client.renderer.EntityRenderer;
+import net.minecraft.client.shader.ShaderGroup;
+import net.minecraft.util.ResourceLocation;
 
 public class CraftYourLifeRPClient 
 {
@@ -29,12 +35,17 @@ public class CraftYourLifeRPClient
 	
 	private static int displayBlackScreen; //display black screen in seconds
 	
+	private static int selectedShaderIndex;
+
+	
 	//public static Effect currentEffect;
 	
-	//public static PlayerCachedData cachedData;
 	
 	public static ExtendedPlayer cachedData;
+	
+    public static final ResourceLocation[] shaderResourceLocations = new ResourceLocation[] {new ResourceLocation("shaders/post/notch.json"), new ResourceLocation("shaders/post/fxaa.json"), new ResourceLocation("shaders/post/art.json"), new ResourceLocation("shaders/post/bumpy.json"), new ResourceLocation("shaders/post/blobs2.json"), new ResourceLocation("shaders/post/pencil.json"), new ResourceLocation("shaders/post/color_convolve.json"), new ResourceLocation("shaders/post/deconverge.json"), new ResourceLocation("shaders/post/flip.json"), new ResourceLocation("shaders/post/invert.json"), new ResourceLocation("shaders/post/ntsc.json"), new ResourceLocation("shaders/post/outline.json"), new ResourceLocation("shaders/post/phosphor.json"), new ResourceLocation("shaders/post/scan_pincushion.json"), new ResourceLocation("shaders/post/sobel.json"), new ResourceLocation("shaders/post/bits.json"), new ResourceLocation("shaders/post/desaturate.json"), new ResourceLocation("shaders/post/green.json"), new ResourceLocation("shaders/post/blur.json"), new ResourceLocation("shaders/post/wobble.json"), new ResourceLocation("shaders/post/blobs.json"), new ResourceLocation("shaders/post/antialias.json")};
 
+	
 	
 	public CraftYourLifeRPClient()
 	{
@@ -163,6 +174,36 @@ public class CraftYourLifeRPClient
     public static int getBlackScreenTime()
     {
     	return displayBlackScreen;
+    }
+    
+    public static void displayShader(int index)
+    {
+    	if(selectedShaderIndex == index) return;
+    	
+    	Minecraft mc = Minecraft.getMinecraft();
+		selectedShaderIndex = index;
+	
+			
+        try {
+            mc.entityRenderer.theShaderGroup = new ShaderGroup(mc.getTextureManager(), mc.getResourceManager(), mc.getFramebuffer(), shaderResourceLocations[selectedShaderIndex]);
+            mc.entityRenderer.theShaderGroup.createBindFramebuffers(mc.displayWidth, mc.displayHeight); 
+        }
+            
+        catch (IOException ioexception)
+        {
+    		selectedShaderIndex = EntityRenderer.shaderCount;
+        }
+        catch (JsonSyntaxException jsonsyntaxexception)
+        {
+    		selectedShaderIndex = EntityRenderer.shaderCount;
+        }
+    }
+    
+    public static void disableShader()
+    {
+    	Minecraft mc = Minecraft.getMinecraft();
+		mc.entityRenderer.deactivateShader();
+		selectedShaderIndex = EntityRenderer.shaderCount;
     }
 	
 	

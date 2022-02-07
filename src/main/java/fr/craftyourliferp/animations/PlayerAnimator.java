@@ -91,7 +91,7 @@ public abstract class PlayerAnimator {
 		return animationIsPlaying;
 	}
 	
-    public  void copyModelAngles(ModelRenderer source, ModelRenderer dest)
+    public  void copyModel(ModelRenderer source, ModelRenderer dest)
     {
         dest.rotateAngleX = source.rotateAngleX;
         dest.rotateAngleY = source.rotateAngleY;
@@ -99,6 +99,10 @@ public abstract class PlayerAnimator {
         dest.rotationPointX = source.rotationPointX;
         dest.rotationPointY = source.rotationPointY;
         dest.rotationPointZ = source.rotationPointZ;
+        
+        dest.offsetX = source.offsetX;
+        dest.offsetY = source.offsetY;
+        dest.offsetZ = source.offsetZ;
     }
 	
 }

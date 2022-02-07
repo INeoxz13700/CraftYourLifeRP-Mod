@@ -10,6 +10,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -98,6 +100,8 @@ import fr.craftyourliferp.entities.EntityStopStick;
 import fr.craftyourliferp.fire.FireHandler;
 import fr.craftyourliferp.game.events.EntityTrackerHandler;
 import fr.craftyourliferp.game.events.EventsListener;
+import fr.craftyourliferp.game.events.ReanimationHandler;
+import fr.craftyourliferp.game.events.RegionHandler;
 import fr.craftyourliferp.game.events.RendererListener;
 import fr.craftyourliferp.items.*;
 import fr.craftyourliferp.items.renderer.ItemAtmRenderer;
@@ -136,12 +140,11 @@ public class CraftYourLifeRPMod {
 	    
 
 		public static final String MODID = "craftyourliferpmod";
-		public static final String VERSION = "4.0.1.7";
+		public static final String VERSION = "4.5";
 
 		
 		public static String[] startItem;
 		public static int ATM = 1;
-		public static int MASK_ID = 9401;
 				
 			 					
 	    public static RadioHandler radioHandler = new RadioHandler();
@@ -155,10 +158,12 @@ public class CraftYourLifeRPMod {
 		public static final FireHandler fireHandler = new FireHandler();
 		public static final EntityTrackerHandler entityTrackerHandler = new EntityTrackerHandler();
 		public static final CaptureHandler captureHander = new CaptureHandler();
-		
+		public static final ReanimationHandler reanimationHandler = new ReanimationHandler();
+		public static final RegionHandler regionHandler = new RegionHandler();
 		//public static HalloweenEvent halloweenEvent;
 				
 		private static CraftYourLifeRPClient cylrpClient;
+		
 		
 		public static boolean localhost = false;
 		
@@ -183,7 +188,7 @@ public class CraftYourLifeRPMod {
 
 	    	
     		//Effect.registeredEffects.add(new ScreamEffect());
-	    	CRPCreativeTabs = new CRPTab("crp_creative_tabs"){}.setNoTitle().setBackgroundImageName("c_creativetabs.png");
+	    	CRPCreativeTabs = new CRPTab("crp_creative_tabs"){}.setNoTitle().setBackgroundImageName("cyl_creativetabs.png");
 	        
 	    	
 	    	ModdedItems.registerItems();
@@ -195,7 +200,6 @@ public class CraftYourLifeRPMod {
 	  
 	         
 	    	configFile = new Configuration(event.getSuggestedConfigurationFile());
-	        
 	    	syncConfig(event.getSide());
 		}
 		
@@ -318,14 +322,17 @@ public class CraftYourLifeRPMod {
 			registerEntity("football_ball",EntityFootballBall.class);
 			registerEntity("item_collider",EntityItemCollider.class);
 			registerEntity("stopstick",EntityStopStick.class);
-
 			
 	    	proxy.init();
+	    	
+	    	
 			
 			File dataFolder = new File("NumberData/");
 			
 			if(!dataFolder.exists()) dataFolder.mkdir();
 	    }
+		
+		
 	    
 		@Mod.EventHandler
 		public void serverLoad(FMLServerStartingEvent event)
@@ -359,14 +366,15 @@ public class CraftYourLifeRPMod {
 		    	configFile.save();
 		}
 		    
-		    public static void syncConfig(Side side) {		   	 	
-		    	if(side.isServer())
-		    	{
-			    	startItem = configFile.getStringList("Item de depart", Configuration.CATEGORY_GENERAL, new String[]{"1-1"}, "ItemId-Quantite (Item de depart)");
-			    	ATM = configFile.getInt(name, Configuration.CATEGORY_GENERAL, 0, 0, 999999, "Id atm");    	
-			    	if(configFile != null && configFile.hasChanged())configFile.save();
-		    	}
-		   }
+		public static void syncConfig(Side side)
+		{		   	 	
+		    if(side.isServer())
+		    {
+			    startItem = configFile.getStringList("Item de depart", Configuration.CATEGORY_GENERAL, new String[]{"1-1"}, "ItemId-Quantite (Item de depart)");
+			    ATM = configFile.getInt(name, Configuration.CATEGORY_GENERAL, 0, 0, 999999, "Id atm");    	
+		    }
+		    if(configFile != null && configFile.hasChanged())configFile.save();
+		}
 	    
 
 	    

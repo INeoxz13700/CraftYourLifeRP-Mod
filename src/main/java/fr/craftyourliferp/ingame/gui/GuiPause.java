@@ -46,12 +46,12 @@ public class GuiPause extends GuiScreen {
         this.buttonList.add(new GuiButton(6, this.width / 2 + 2, this.height / 4 + 48 + b0, 98, 20, I18n.format("gui.stats", new Object[0])));
         guibutton.enabled = this.mc.isSingleplayer() && !this.mc.getIntegratedServer().getPublic();
         
-        //if(!Minecraft.getMinecraft().isIntegratedServerRunning())
-        //{
-            this.buttonList.add(new GuiButton(8, this.width / 2 + 2, this.height / 2 + 66 , 98, 20, "§6Cosmétiques"));
-            this.buttonList.add(new GuiButton(9, this.width / 2 - 100, this.height / 2 + 66 , 98, 20, "§6Entreprise"));
-            this.buttonList.add(new GuiButton(10, this.width / 2 - 100, this.height / 2 + 87 , 200, 20, "§bGestion avatar"));
-        //}
+        if(!Minecraft.getMinecraft().isIntegratedServerRunning())
+        {
+            this.buttonList.add(new GuiButton(8, this.width / 2 + 2, this.height / 4 + 144 + b0 , 98, 20, "§6Cosmétiques"));
+            this.buttonList.add(new GuiButton(9, this.width / 2 - 100, this.height / 4 + 144 + b0, 98, 20, "§6Entreprise"));
+            this.buttonList.add(new GuiButton(10, this.width / 2 - 100, this.height / 4 + 168 + b0, 200, 20, "§bGestion avatar"));
+        }
 
     }
     

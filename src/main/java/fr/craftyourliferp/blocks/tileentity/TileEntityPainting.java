@@ -155,8 +155,7 @@ public class TileEntityPainting extends TileEntity implements IStealingTileEntit
 		
 		entityStealing.addChatMessage(new ChatComponentText("§aVous venez de dérober un tableau!"));
 		
-		ServerUtils.broadcastMessage("§9[Force de l'ordre] §cLe musée ce fait braquer des renforts sont demandés", (byte)3);
-		ServerUtils.broadcastMessage("§9[Force de l'ordre] §cLe musée ce fait braquer des renforts sont demandés", (byte)0);
+		ServerUtils.broadcastMessage("§9[Force de l'ordre] §cLe musée se fait braquer, des renforts sont demandés", (byte)0);
 		
 		System.out.println("/wanted add " + entityStealing.getCommandSenderName() + " 4");
 		//PlayerCachedData.getData(entityStealing).setNotStealing();

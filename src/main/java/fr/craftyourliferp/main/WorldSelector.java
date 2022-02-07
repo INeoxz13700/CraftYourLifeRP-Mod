@@ -10,6 +10,7 @@ import fr.craftyourliferp.utils.DataUtils;
 import fr.craftyourliferp.utils.MathsUtils;
 import fr.craftyourliferp.utils.ServerUtils;
 import fr.craftyourliferp.utils.WorldUtils;
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -279,6 +280,28 @@ public class WorldSelector {
 				}
 			}
 		}
+	}
+	
+	public boolean allBlocksNotAir()
+	{
+		Vec3 floor_coordinates1 = Vec3.createVectorHelper(Math.floor(pos1.xCoord), Math.floor(pos1.yCoord), Math.floor(pos1.zCoord));
+		Vec3 floor_coordinates2 = Vec3.createVectorHelper(Math.floor(pos2.xCoord), Math.floor(pos2.yCoord), Math.floor(pos2.zCoord));
+
+		for(int y = 0; y <= (int)Math.abs(floor_coordinates2.yCoord - floor_coordinates1.yCoord); y++)
+		{
+			for(int x = 0; x <= (int)Math.abs(floor_coordinates2.xCoord - floor_coordinates1.xCoord); x++)
+			{
+				for(int z = 0; z <= (int)Math.abs(floor_coordinates2.zCoord - floor_coordinates1.zCoord); z++)
+				{
+					Block block = worldObj.getBlock((int)floor_coordinates1.xCoord + MathsUtils.Clamp((int)(floor_coordinates2.xCoord-floor_coordinates1.xCoord), -1, 1) * x, (int)floor_coordinates1.yCoord + MathsUtils.Clamp((int)(floor_coordinates2.yCoord-floor_coordinates1.yCoord), -1, 1) * y, (int)floor_coordinates1.zCoord + MathsUtils.Clamp((int)(floor_coordinates2.zCoord-floor_coordinates1.zCoord), -1, 1) * z);	
+					if(block == Blocks.air)
+					{
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 	
 	public Vec3 getRandomPosInSelection(boolean topBlock)
