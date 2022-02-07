@@ -8,6 +8,7 @@ import fr.craftyourliferp.main.CraftYourLifeRPMod;
 import fr.craftyourliferp.main.ExtendedPlayer;
 import fr.craftyourliferp.network.PacketAlcol;
 import fr.craftyourliferp.utils.ServerUtils;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
@@ -29,9 +30,11 @@ public class ItemCigarette extends Item
     {		
 		player.setItemInUse(itemstack, this.getMaxItemUseDuration(itemstack));
 		
+
 		
 		return super.onItemRightClick(itemstack, world, player);
 	}
+
 	
 	@Override
     public ItemStack onEaten(ItemStack is, World world, EntityPlayer player)

@@ -38,8 +38,14 @@ public class ArmaMania {
   
   public static Item A;
   
+  public static Item C;
+  
+  public static Item D;
+  
+  public static Item E;
+  
   public static Item F;
-
+ 
   
   public static Item M;
   
@@ -185,6 +191,9 @@ public class ArmaMania {
     i = (new itemCok3()).setUnlocalizedName("itemCok3").setTextureName("armamania:cok3").setCreativeTab(bI).setMaxStackSize(1);
     z = (new itemCheque()).setUnlocalizedName("cheque").setTextureName("armamania:cheque").setCreativeTab(bI);
     A = (new itemFouille()).setUnlocalizedName("BatonFouille").setTextureName("armamania:batonFouille").setCreativeTab(bI).setMaxStackSize(1);
+    C = (new itemNote1()).setUnlocalizedName("1 $").setTextureName("armamania:note1").setCreativeTab(bI);
+    D = (new itemNote10()).setUnlocalizedName("10 $").setTextureName("armamania:note10").setCreativeTab(bI);
+    E = (new itemNote100()).setUnlocalizedName("100 $").setTextureName("armamania:note100").setCreativeTab(bI);
     F = (new itemNote1000()).setUnlocalizedName("1000 $").setTextureName("armamania:note1000").setCreativeTab(bI);
     M = (new itemLockpick()).setUnlocalizedName("lockpick").setTextureName("armamania:lockpick").setCreativeTab(bI).setMaxStackSize(1);
     O = (new itemArtefact()).setUnlocalizedName("Artefact").setTextureName("armamania:Artefact").setCreativeTab(bI).setMaxStackSize(5);
@@ -247,6 +256,9 @@ public class ArmaMania {
     GameRegistry.registerItem(i, "itemCok3");
     GameRegistry.registerItem(z, "ItemCheque");
     GameRegistry.registerItem(A, "ItemFouille");
+    GameRegistry.registerItem(C, "itemNote1");
+    GameRegistry.registerItem(D, "itemNote10");
+    GameRegistry.registerItem(E, "itemNote100");
     GameRegistry.registerItem(F, "itemNote1000");
     GameRegistry.registerItem(M, "itemLockpick");
     GameRegistry.registerItem(R, "ItemDallas");
@@ -296,6 +308,7 @@ public class ArmaMania {
     GameRegistry.registerItem(bm, "itemPolice");
     GameRegistry.registerItem(bn, "itemMaire");
     GameRegistry.registerItem(bo, "itemCitoyen");
+    
     bq = (new BlockTest2(Material.grass)).setBlockName("CannabisPlant").setBlockTextureName("armamania:cannabisBlock").setCreativeTab(bI);
     br = (new BlockTest3(Material.grass)).setBlockName("CocainePlant").setBlockTextureName("armamania:cocaineBlock").setCreativeTab(bI);
     bs = (new BlockTest4(Material.grass)).setBlockName("TabacPlant").setBlockTextureName("armamania:tabacBlock").setCreativeTab(bI);
