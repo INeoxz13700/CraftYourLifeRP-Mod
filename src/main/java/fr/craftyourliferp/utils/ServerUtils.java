@@ -1,6 +1,7 @@
 package fr.craftyourliferp.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -28,6 +29,8 @@ import net.minecraft.world.WorldServer;
 public class ServerUtils 
 {
 	
+	//public static List<String> snipersType = Arrays.asList("anti-materiel sniper rifle","sniper rifle","sniper rifle/designated marksmen rifle","designated marksmen rifle","sniper","bolt-action rifle","bullpup marskmen rifle", "crossbow", "semi-automatic battle rifle","suppressed sniper rifle","semi-automatic carbine");
+
 	
 	public static boolean isOp(EntityPlayer player)
 	{ 
@@ -202,7 +205,7 @@ public class ServerUtils
 	{
 		ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
 
-		if(extendedPlayer.serverData.job.equalsIgnoreCase("douanier") && extendedPlayer.serverData.grade >= 3)
+		if((extendedPlayer.serverData.job.equalsIgnoreCase("douanier") || extendedPlayer.serverData.job.equalsIgnoreCase("bac")) && extendedPlayer.serverData.grade >= 3)
 		{
 			return true;
 		}
@@ -271,7 +274,7 @@ public class ServerUtils
 	 * 2: notification
 	 * 3: chatmessage
 	 */
-	public static void broadcastMessage(String msg, byte type)
+	public static void broadcastMessage(String msg, int type)
 	{
 		if(type == 3)
 		{
@@ -283,7 +286,7 @@ public class ServerUtils
 		}
 		else
 		{
-			PacketMessageDisplay packet = new PacketMessageDisplay(msg,1000,type);
+			PacketMessageDisplay packet = new PacketMessageDisplay(msg,1000,(byte)type);
 			CraftYourLifeRPMod.packetHandler.sendToAll(packet);
 		}
 	}
@@ -293,6 +296,36 @@ public class ServerUtils
 		PacketMessageDisplay packet = new PacketMessageDisplay(msg,duration,(byte)type);
 		CraftYourLifeRPMod.packetHandler.sendTo(packet, (EntityPlayerMP)to);
 	}
+	
+	public static void broadcastMessageJob(World world, String msg, String jobName)
+	{
+		for(EntityPlayer player : (List<EntityPlayer>)world.playerEntities)
+		{
+			ExtendedPlayer extendedPlayer = ExtendedPlayer.get(player);
+			if(extendedPlayer.serverData.job.equalsIgnoreCase(jobName)) ServerUtils.sendChatMessage(player, msg);
+		}
+	}
+	
+	/*public static boolean itemStackIsSniper(ItemStack is)
+	{
+		if(is == null) return false;
+		
+		List<String> lores = ServerUtils.getLore(is);
+		
+		if(lores.size() == 0) return false;
+		
+		String lore = lores.get(0);
+		if(lore.startsWith("Type: "))
+		{
+			String type = lore.substring(6);
+			if (snipersType.contains(type.toLowerCase()))
+			{
+				return true;
+			}
+		}
+		return false;
+		
+	}*/
 	
     public static void removeItemsFromInventory(List<ItemStack> toRemove, EntityPlayer player)
     {

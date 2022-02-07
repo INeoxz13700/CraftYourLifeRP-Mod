@@ -35,4 +35,40 @@ public class StringUtils {
 		return "";
 	}
 	
+	public static String getLeftTimeDisplay(int leftTime)
+	{
+		
+		if(leftTime < 0)
+		{
+			leftTime = 0;
+		}
+		
+		int hours = (int) (leftTime / 60 / 60); 
+		int minutes = (int) (leftTime / 60) % 60;
+		int seconds = (int)(leftTime % 60);
+
+
+		String hoursStr = hours + "";
+		if(hours <= 9)
+		{
+			hoursStr = "0" + hours;
+		}
+		
+		String minutesStr = minutes + "";
+
+		if(minutes <= 9)
+		{
+			minutesStr = "0" + minutes;
+		}
+
+		String secondsStr = seconds + "";
+
+		if(seconds <= 9)
+		{
+			secondsStr = "0" + seconds;
+		}
+		
+		return hoursStr + ":" + minutesStr + ":" + secondsStr;
+
+	}
 }
