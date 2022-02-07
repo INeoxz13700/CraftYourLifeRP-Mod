@@ -122,6 +122,10 @@ public class CaptureHandler {
 						}
 						
 					}
+					else
+					{
+						ServerUtils.sendChatMessage(event.player, "§cVous devez avoir un métier illégal pour braquer le central nucléaire");
+					}
 				}	
 								
 				List<WorldSelector> toRemove = new ArrayList();

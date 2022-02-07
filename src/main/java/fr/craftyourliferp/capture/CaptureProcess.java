@@ -98,9 +98,21 @@ public class CaptureProcess implements ISaveHandler
 		public void call(World world) 
 		{ 
 			WorldSelector selector = new WorldSelector(world);
+			selector.setSelectedPos1(Vec3.createVectorHelper(-192, 69, 1086));
+			selector.setSelectedPos2(Vec3.createVectorHelper(-192, 71, 1082));
+			selector.clearBlocksInArea();
+			
+			selector = new WorldSelector(world);
 			selector.setSelectedPos1(Vec3.createVectorHelper(-196, 69, 1086));
 			selector.setSelectedPos2(Vec3.createVectorHelper(-196, 71, 1082));
 			selector.clearBlocksInArea();
+			
+			selector = new WorldSelector(world);
+			selector.setSelectedPos1(Vec3.createVectorHelper(-200, 69, 1086));
+			selector.setSelectedPos2(Vec3.createVectorHelper(-200, 71, 1082));
+			selector.clearBlocksInArea();
+			
+			
 			for(EntityPlayer player : getPlayersInCapture().values())
 			{
 				ServerUtils.sendMessage("§aZone sous contrôle!", player,1000,0);
@@ -176,8 +188,11 @@ public class CaptureProcess implements ISaveHandler
 
 	public boolean isCapturable(World world)
 	{
-		long elapsedTime = System.currentTimeMillis() - lastCaptureTimer;
-		if(elapsedTime < captureAvaibleTimerInSeconds*1000 && !inCondition(world)) return false;
+		WorldSelector selector = new WorldSelector(world);
+		selector.setSelectedPos1(Vec3.createVectorHelper(-196, 69, 1086));
+		selector.setSelectedPos2(Vec3.createVectorHelper(-196, 69, 1082));
+
+		if(!selector.allBlocksNotAir() || !inCondition(world)) return false;
 		
 		return true;
 	}
@@ -268,15 +283,12 @@ public class CaptureProcess implements ISaveHandler
 		
 		if(extendedPlayer == null) return false;
 		
-		/*if(ServerUtils.isIlegalJob(extendedPlayer.serverData.job))
+		if(ServerUtils.isIlegalJob(extendedPlayer.serverData.job))
 		{
 			return true;
 		}
 		
 		return false;
-		*/
-		
-		return true;
 	}
 	
 	public boolean playerCaptureAlready(EntityPlayer player)
