@@ -137,6 +137,8 @@ public class MinecraftUtils {
 			    		if(block == Blocks.air) continue;
 			    		
 			    		AxisAlignedBB blockAxis = block.getCollisionBoundingBoxFromPool(world, x, y, z);
+			    		if(blockAxis == null) return true;
+			    		
 			    		return axis.intersectsWith(blockAxis);
 			    	}
 		    	}
