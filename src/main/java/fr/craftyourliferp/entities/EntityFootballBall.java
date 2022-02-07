@@ -101,7 +101,7 @@ public class EntityFootballBall extends Entity {
     public void onEntityUpdate()
     {
 		super.onEntityUpdate();
-        
+		        
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
@@ -141,9 +141,7 @@ public class EntityFootballBall extends Entity {
 	
 		if(selector.selectionDefinied() && !selector.entityInsideSelection(this))
 		{
-		    Vec3 inverseDir = this.getDirection().crossProduct(Vec3.createVectorHelper(-1, -1, -1));
-		    this.motionX += inverseDir.xCoord - motionX; 
-		    this.motionZ += inverseDir.zCoord - motionZ; 
+	    	teleportToInitialPosition();
 		}    
 	    
         rotationYaw = (float)(Math.atan2(posX-prevPosX,posZ-prevPosZ) * MathsUtils.Rad2Deg);
@@ -346,7 +344,6 @@ public class EntityFootballBall extends Entity {
 			}
 		}
 	}
-	
 	
 
 }
