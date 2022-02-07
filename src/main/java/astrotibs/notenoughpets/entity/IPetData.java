@@ -3,6 +3,7 @@ package astrotibs.notenoughpets.entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAISit;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.world.World;
 
 public interface IPetData {
 
@@ -26,19 +27,19 @@ public interface IPetData {
 	
 	public float getHygiene();
 	
-	public EntityLivingBase getOwner();
+	public EntityLivingBase getOwnerImplements();
 	
-	public void setTamed(boolean value);
+	public void setTamedImplements(boolean value);
 	
-	public void func_152115_b(String UUID);
+	public void func_152115_bImplements(String UUID);
 	
-    public EntityAISit func_70907_r();
+    public EntityAISit func_70907_rImplements();
     
-    public void setGrowingAge (int growthTick);
+    public void setGrowingAgeImplements (int growthTick);
 
-    public int getGrowingAge();
+    public int getGrowingAgeImplements();
     
-    public void playTameEffect(boolean bool);
+    public void playTameEffectImplements(boolean bool);
     
     public float getMood();
     
@@ -46,16 +47,17 @@ public interface IPetData {
     
     public void setPetState(PetStateEnum state);
     
-    public boolean isSitting();
+    public boolean isSittingImplements();
     
-    public int getAge();
+    public int getAgeImplements();
     
-    public ChunkCoordinates getHomePosition();
+    public ChunkCoordinates getHomePositionImplements();
     
-    public void setHomeArea(int x, int y, int z, int range);
+    public void setHomeAreaImplements(int x, int y, int z, int range);
     
-    public float func_110174_bM();
+    public float func_110174_bM_Implements();
     
-    public boolean isWithinHomeDistanceCurrentPosition();
+    public boolean isWithinHomeDistanceCurrentPositionImplements();
+    
 	
 }

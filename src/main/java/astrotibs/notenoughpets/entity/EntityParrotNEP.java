@@ -60,6 +60,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -109,10 +110,7 @@ public class EntityParrotNEP extends EntityTameable implements EntityFlying, IPe
     	Item beetrootseed = new Item();
     	
     	// Gany's Surface
-    	beetrootseed = FunctionsNEP.getItemFromName(Reference.BEETROOT_SEED_GS);
-    	if (beetrootseed != null) {TAME_ITEMS.add(beetrootseed);}
-    	// Et Futurum
-    	beetrootseed = FunctionsNEP.getItemFromName(Reference.BEETROOT_SEED_EF);
+    	beetrootseed = FunctionsNEP.getItemFromName("armamania:ItemBeets");
     	if (beetrootseed != null) {TAME_ITEMS.add(beetrootseed);}
     }
     
@@ -146,13 +144,12 @@ public class EntityParrotNEP extends EntityTameable implements EntityFlying, IPe
         ReflectionHelper.setPrivateValue(EntityLiving.class, this, new EntityFlyHelper(this), new String[]{"moveHelper", "field_70765_h"});
         this.nextFlap = 1.0F;
         
-        //EntityAIFollowOwnerNEC.removeVanillaFollow(this);
         
         this.tasks.addTask(0, new EntityAIPanic(this, 1.25D)); // Same as 1.8
         this.tasks.addTask(0, new EntityAISwimmingNEP(this));
         this.tasks.addTask(1, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
         this.aiSit = new EntityAISit(this); this.tasks.addTask(2, this.aiSit);
-        if (GeneralConfig.followOwnerParrot) {this.tasks.addTask(2, new EntityAIFollowOwnerFlying(this, 1.0D, 5.0F, 1.0F));} // Effectively the same as 1.8
+        this.tasks.addTask(2, new EntityAIFollowOwnerFlying(this, 1.0D, 5.0F, 1.0F));
         this.tasks.addTask(2, new EntityAIWanderAvoidWaterFlying(this, 1.0D));
         this.tasks.addTask(3, new EntityAIFollowParrot(this, 1.0D, 3.0F, 7.0F));
         this.tasks.addTask(4, new EntityAIMate(this, 0.8D));
@@ -417,6 +414,12 @@ public class EntityParrotNEP extends EntityTameable implements EntityFlying, IPe
     {
     	if(worldObj.isRemote) return true;
     	
+    	if(getOwner() != player)
+    	{
+    		return true;
+    	}
+    	
+    	
     	ItemStack itemstack = player.inventory.getCurrentItem();
     	
     	
@@ -443,9 +446,13 @@ public class EntityParrotNEP extends EntityTameable implements EntityFlying, IPe
 			{
 				ServerUtils.sendChatMessage(player, "§bVotre animal ne vous suit plus");
 			}
-			else
+			else if(petState == 2)
 			{
 				ServerUtils.sendChatMessage(player, "§bVotre animal est en repos");
+			}
+			else if(petState == 3)
+			{
+				ServerUtils.sendChatMessage(player, "§bDéfinissez la maison de votre animal (clique droit sur un bloc)");
 			}
 			
 			setPetState(PetStateEnum.values()[petState]);
@@ -493,6 +500,8 @@ public class EntityParrotNEP extends EntityTameable implements EntityFlying, IPe
 				}
     			else
     			{
+    				if(!(itemstack.getItem() instanceof ItemFood) && !isHealingFood(itemstack.getItem()) && itemstack.getItem() != Items.milk_bucket) return true;
+    				
     				if(getFood() >= GeneralConfig.MAX_FOOD && getHealth() >= getMaxHealth())
     				{
         				ServerUtils.sendChatMessage(player, "§cVotre animal refuse de manger");
@@ -503,7 +512,7 @@ public class EntityParrotNEP extends EntityTameable implements EntityFlying, IPe
         			{
             			if(itemstack.getItem() != Items.milk_bucket)
             			{
-            				ServerUtils.sendChatMessage(player, "§cVotre animal refuse de manger");
+            				ServerUtils.sendChatMessage(player, "§cLes animaux de cette âge préfèrent du lait.");
             			}
             			else
             			{
@@ -1189,6 +1198,11 @@ public class EntityParrotNEP extends EntityTameable implements EntityFlying, IPe
     public void writeEntityToNBT(NBTTagCompound compound)
     {
         super.writeEntityToNBT(compound);
+        
+        compound.setInteger("HomePositionX", getHomePosition().posX);
+        compound.setInteger("HomePositionY", getHomePosition().posY);
+        compound.setInteger("HomePositionZ", getHomePosition().posZ);
+        
         compound.setInteger("Variant", this.getVariant());
         
         if(petName != null)
@@ -1209,6 +1223,10 @@ public class EntityParrotNEP extends EntityTameable implements EntityFlying, IPe
     public void readEntityFromNBT(NBTTagCompound compound)
     {
         super.readEntityFromNBT(compound);
+        
+        setHomeArea(compound.getInteger("HomePositionX"), compound.getInteger("HomePositionY"), compound.getInteger("HomePositionZ"), 16);
+
+        
         this.setVariant(compound.getInteger("Variant"));
         
         if(compound.hasKey("PetName"))
@@ -1361,4 +1379,75 @@ public class EntityParrotNEP extends EntityTameable implements EntityFlying, IPe
 		int age = (int) (((System.currentTimeMillis() - getPetBirthday()) / 1000) / 31104000);
 		return age;
 	}
+	
+	@Override
+	public void setTamedImplements(boolean value) {
+		this.setTamed(value);	
+	}
+	
+
+	@Override
+	public void setGrowingAgeImplements(int growthTick) {
+		this.setGrowingAge(growthTick);
+	}
+
+	@Override
+	public void setHomeAreaImplements(int x, int y, int z, int range) {
+		this.setHomeArea(x, y, z, range);
+	}
+	
+	@Override
+	public EntityLivingBase getOwnerImplements() {
+		return getOwner();
+	}
+	
+
+	@Override
+	public ChunkCoordinates getHomePositionImplements() {
+		return getHomePosition();
+	}
+	
+
+	@Override
+	public int getGrowingAgeImplements() {
+		return getGrowingAge();
+	}
+	
+	@Override
+	public boolean isSittingImplements() {
+		return isSitting();
+	}
+	
+	@Override
+	public int getAgeImplements() {
+		return getAge();
+	}
+	
+	@Override
+	public float func_110174_bM_Implements() {
+		return func_110174_bM();
+	}
+
+	@Override
+	public boolean isWithinHomeDistanceCurrentPositionImplements() {
+		return isWithinHomeDistanceCurrentPosition();
+	}
+	
+	@Override
+	public void playTameEffectImplements(boolean bool) {
+		playTameEffect(bool);
+	}
+	
+
+	@Override
+	public void func_152115_bImplements(String UUID) {
+		this.func_152115_b(UUID);
+	}
+
+	@Override
+	public EntityAISit func_70907_rImplements() {
+		return this.func_70907_r();
+	}
+
+
 }

@@ -9,8 +9,6 @@ public class Reference
 	public static final String MOD_NAME = "Not Enough Pets";
 	public static final String MOD_NAME_COLORIZED = EnumChatFormatting.YELLOW + MOD_NAME;
 	public static final String VERSION = "2.3.1";
-	public static final String URL = "https://www.curseforge.com/minecraft/mc-mods/not-enough-pets";
-	public static final String VERSION_CHECKER_URL = "https://gitgud.io/AstroTibs/not-enough-cats/raw/1.7.10/CURRENT_VERSION"; // Updated to gitgud because i'm a good codey boi
 	public static final String MOD_CHANNEL = "nep_channel"; 
 	
 	//public static final String MOD_CHANNEL = "necChannel";
@@ -47,15 +45,5 @@ public class Reference
 	public static final String MOB_PARROT_NEP = "Parrot_NEP"; 
 
 	
-	// Mod object strings v2.0.0
 
-	// --------------------------------------------- //
-	// --- Blocks and items reference for trades --- //
-	// --------------------------------------------- //
-
-	// Blocks
-	
-	// Items
-	public static final String BEETROOT_SEED_EF = "etfuturum:beetroot_seeds";
-	public static final String BEETROOT_SEED_GS = "ganyssurface:beetrootSeeds";
 }

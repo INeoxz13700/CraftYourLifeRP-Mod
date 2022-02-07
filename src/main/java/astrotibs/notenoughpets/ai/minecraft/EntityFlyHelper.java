@@ -1,6 +1,7 @@
 package astrotibs.notenoughpets.ai.minecraft;
 
 import astrotibs.notenoughpets.entity.EntityParrotNEP;
+import astrotibs.notenoughpets.entity.PetStateEnum;
 import astrotibs.notenoughpets.util.minecraft.MathHelper18;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import net.minecraft.entity.EntityLiving;
@@ -25,6 +26,7 @@ public class EntityFlyHelper extends EntityMoveHelper
     	
     	if (entity_reflected instanceof EntityParrotNEP)
     	{
+    		
     		if (this.isUpdating())
             {
             	ReflectionHelper.setPrivateValue(EntityMoveHelper.class, this, false, new String[]{"update", "field_75643_f"});

@@ -21,6 +21,8 @@ import astrotibs.notenoughpets.util.FunctionsNEP;
 import astrotibs.notenoughpets.util.LogHelper;
 import astrotibs.notenoughpets.util.Reference;
 import astrotibs.notenoughpets.util.SkinVariations;
+import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.WorldTickEvent;
@@ -59,13 +61,41 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
+import net.minecraftforge.event.world.ChunkEvent;
 
 public class EventHandlerNEP {
 	
 
+	@SubscribeEvent
+	public void onPlayerInterractWithBlock(PlayerInteractEvent event)
+	{
+		if(event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)
+		{
+			ExtendedPlayer extendedPlayer = ExtendedPlayer.get(event.entityPlayer);
+			for(Entity entity : (List<Entity>)event.entityPlayer.worldObj.loadedEntityList)
+			{
+				if(extendedPlayer.petsOwned.containsKey(entity.getUniqueID()))
+				{
+					IPetData petData = (IPetData)entity;
+
+					if(petData.getPetState() == PetStateEnum.DEFINE_HOME)
+					{
+						petData.setHomeAreaImplements(event.x, event.y, event.z, 16);
+						extendedPlayer.petsOwned.replace(entity.getUniqueID(), new ChunkCoordinates(event.x, event.y, event.z));
+						ServerUtils.sendChatMessage(event.entityPlayer, "§aLa nouvelle maison de votre animal a été définie");
+						petData.setPetState(PetStateEnum.REST);
+						event.setCanceled(true);
+					}
+				}
+			}
+		}
+	}
+	
 	@SubscribeEvent
 	public void onPlayerInterractWithPet(EntityInteractEvent event)
 	{
@@ -82,11 +112,13 @@ public class EventHandlerNEP {
 					}
 					else
 					{
+						if(petData.getOwnerImplements() != event.entity) return;
+						
 						if(event.entity.isSneaking()) return;
 						
 						SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 						String date = simpleDateFormat.format(new Date(petData.getPetBirthday()));
-						int age = petData.getAge();
+						int age = petData.getAgeImplements();
 						
 						ServerUtils.sendChatMessage(event.entityPlayer, "");
 
@@ -198,6 +230,9 @@ public class EventHandlerNEP {
 						{
 							ServerUtils.sendChatMessage(event.entityPlayer, "§6Humeur : §a:)");
 						}
+						
+						ServerUtils.sendChatMessage(event.entityPlayer, "");
+						ServerUtils.sendChatMessage(event.entityPlayer, "§aSneak + Clique droit pour changer le mode de votre animal");
 					}
 				}
 			}
@@ -247,7 +282,7 @@ public class EventHandlerNEP {
 		if(event.target instanceof IPetData)
 		{
 			IPetData petData = (IPetData)event.target;
-			if(petData.getOwner() == null)
+			if(petData.getOwnerImplements() == null)
 			{
 				event.setCanceled(true);
 			}
@@ -262,19 +297,19 @@ public class EventHandlerNEP {
 		if(event.entityLiving instanceof IPetData)
 		{
 			IPetData petData = (IPetData)event.entityLiving;
-			if(petData.getOwner() == null)
+			if(petData.getOwnerImplements() == null)
 			{
 				event.setCanceled(true);
 				event.entityLiving.heal(20f);
 			}
 			else
 			{
-				EntityPlayer player = (EntityPlayer)petData.getOwner();
+				EntityPlayer player = (EntityPlayer)petData.getOwnerImplements();
 				ExtendedPlayer exp = ExtendedPlayer.get(player);
 				
 				exp.petsOwned.remove(event.entityLiving.getUniqueID());
 				if(petData.getPetName() != null)
-					ServerUtils.sendChatMessage(player, "§b" + petData.getPetName() + " §cvous a quitté à §b" + petData.getAge() + " §can(s) paix à son âme!");
+					ServerUtils.sendChatMessage(player, "§b" + petData.getPetName() + " §cvous a quitté à §b" + petData.getAgeImplements() + " §can(s) paix à son âme!");
 			}
 		}
 	}
@@ -292,13 +327,21 @@ public class EventHandlerNEP {
     		convertVanillaWolfToNEP(wolfVanilla);
     	}
     	
-    	
     	if(event.entityLiving instanceof IPetData)
     	{
     		EntityLiving entityLiving = (EntityLiving)event.entityLiving;
     		IPetData petData = (IPetData) event.entityLiving;
-    		    		
-    		if(petData.getOwner() == null) return;
+    		    	
+    		if(petData.getOwnerImplements() == null) 
+    		{
+    			if(!petData.isWithinHomeDistanceCurrentPositionImplements())
+    			{
+    				
+    				ChunkCoordinates chunk = petData.getHomePositionImplements();
+    				entityLiving.setPosition(chunk.posX, chunk.posY+1, chunk.posZ);
+    			}
+    			return;
+    		}
     		
     		float lossFeed = 0.98f;
     		float lossHygiene = 0.98f;
@@ -311,7 +354,7 @@ public class EventHandlerNEP {
         			lossEnergy *= 0.98;
         		}
         		
-        		if(petData.isSitting())
+        		if(petData.isSittingImplements())
         		{
         			lossEnergy *= 1.021500f;
         		}
@@ -341,15 +384,13 @@ public class EventHandlerNEP {
     		if(petData.getEnergy() < 1F)
     		{
     			petData.setPetState(PetStateEnum.REST);
-    			ChunkCoordinates chunkCoords = petData.getHomePosition();
-    			System.out.println(chunkCoords);
-    			int randX = MathHelper.getRandomIntegerInRange(event.entityLiving.getRNG(), chunkCoords.posX - (int) petData.func_110174_bM(), chunkCoords.posX + (int) petData.func_110174_bM());
-    			int randZ = MathHelper.getRandomIntegerInRange(event.entityLiving.getRNG(), chunkCoords.posZ - (int) petData.func_110174_bM(), chunkCoords.posZ + (int) petData.func_110174_bM());
-    			if(!petData.isWithinHomeDistanceCurrentPosition())
+
+    			if(!petData.isWithinHomeDistanceCurrentPositionImplements())
     			{
-    				EntityPlayer player = (EntityPlayer)petData.getOwner();
+    				EntityPlayer player = (EntityPlayer)petData.getOwnerImplements();
+    				ChunkCoordinates chunk = petData.getHomePositionImplements();
+    				entityLiving.setPosition(chunk.posX, chunk.posY+1, chunk.posZ);
     				ServerUtils.sendChatMessage(player, "§cVotre animal de compagnie est épuisé");
-    				entityLiving.setPosition(randX, chunkCoords.posY+1, randZ);
     			}
     		}
     	} 
@@ -569,6 +610,13 @@ public class EventHandlerNEP {
 		wolfVanilla.setDead();
 		wolfNEC.worldObj.spawnEntityInWorld(wolfNEC);
     }
+    
+    @SubscribeEvent
+    public void onEntityDespawn(LivingSpawnEvent.AllowDespawn event)
+    {
+    	event.setResult(Result.DENY);
+    }
+   
     
  
 }

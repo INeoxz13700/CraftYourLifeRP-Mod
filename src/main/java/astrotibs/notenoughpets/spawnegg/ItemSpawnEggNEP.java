@@ -24,6 +24,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Facing;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
@@ -140,7 +141,7 @@ public class ItemSpawnEggNEP extends Item
 					--itemStack.stackSize;
 				}
 				
-				exp.petsOwned.add(entity.getUniqueID());
+				exp.petsOwned.put(entity.getUniqueID(), new ChunkCoordinates(x,y,z));
 			}
 			
 			return true;
@@ -254,10 +255,10 @@ public class ItemSpawnEggNEP extends Item
 					{
 						IPetData petData = (IPetData) entity;
 						petData.setPetBirthday(System.currentTimeMillis());
-						petData.setTamed(true);
-						petData.func_152115_b(spawner.getUniqueID().toString());
-						petData.setGrowingAge(-62208000);
-						petData.setHomeArea((int)x, (int)y, (int)z, 10);
+						petData.setTamedImplements(true);
+						petData.func_152115_bImplements(spawner.getUniqueID().toString());
+						petData.setGrowingAgeImplements(-62208000);
+						petData.setHomeAreaImplements((int)x, (int)y, (int)z, 16);
 					}
 				}
 			}

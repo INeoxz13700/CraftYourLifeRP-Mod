@@ -38,14 +38,6 @@ public class GeneralConfig
 	public static int[] strayDimensions;
 
 	public static String[] parrotMimicSounds;
-	
-	public static boolean followOwnerCat;
-	public static boolean followOwnerDog;
-	public static boolean followOwnerParrot;
-
-	public static float followTeleportCat;
-	public static float followTeleportDog;
-	public static float followTeleportParrot;
 
 	public static boolean healingFoodCat;
 	public static boolean healingFoodParrot;
@@ -94,15 +86,6 @@ public class GeneralConfig
 		villageSpawnRatePercent = config.getInt("Village spawn rate percent", CAT_GENERAL, 50, 0, 100, "Villages will check their stray animal populations against their limits every 1.5 seconds and, if there's room, will attempt to spawn a new stray this percent of the time.");
 		strayFractionCat = config.getFloat("Village spawn cat fraction", CAT_GENERAL, 0.75F, 0.0F, 1.0F, "This fraction of village strays are cats. The rest are dogs.");
 		
-		followOwnerCat = config.getBoolean("Follow owner: Cat", CAT_GENERAL, true, "If false, tamed cats will never follow or teleport to their owners.");
-		followOwnerDog = config.getBoolean("Follow owner: Dog", CAT_GENERAL, true, "If false, tamed dogs will never follow or teleport to their owners.");
-		followOwnerParrot = config.getBoolean("Follow owner: Parrot", CAT_GENERAL, true, "If false, tamed parrots will never follow or teleport to their owners.");
-		
-		// Changed minimum values to 0.0F in order to allow teleport disabling -- v2.1.0
-		followTeleportCat = config.getFloat("Follow teleport: Cat", CAT_GENERAL, 12.0F, 0.0F, 256.0F, "If not sitting or leashed, your tamed ocelot/cat will teleport to you when you're farther than this distance away. Set this to 0 to disable teleporting entirely.");
-		followTeleportDog = config.getFloat("Follow teleport: Dog", CAT_GENERAL, 12.0F, 0.0F, 256.0F, "Same as the above setting, but for tamed wolves/dogs.");
-		followTeleportParrot = config.getFloat("Follow teleport: Parrot", CAT_GENERAL, 12.0F, 0.0F, 256.0F, "Same as the above setting, but for tamed parrots.");
-
 		healingFoodCat = config.getBoolean("Healing Food: Cat", CAT_GENERAL, true, "Using the taming food on a tamed cat will heal it.");
 		healingFoodParrot = config.getBoolean("Healing Food: Parrot", CAT_GENERAL, true, "Using the taming food on a tamed parrot will heal it.");
 		

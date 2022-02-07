@@ -4,5 +4,6 @@ public enum PetStateEnum
 {
 	FOLLOW_OWNER,
 	FREEDOM,
-	REST
+	REST,
+	DEFINE_HOME
 };

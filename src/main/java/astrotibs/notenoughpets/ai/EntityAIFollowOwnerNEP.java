@@ -157,37 +157,7 @@ public class EntityAIFollowOwnerNEP extends EntityAIBase
                 {
                     if (!this.thePet.getLeashed() && !this.thePet.isRiding())
                     {
-                    	// Teleportation handler - rejigged
-                    	float catTeleportDist = Math.max(GeneralConfig.followTeleportCat, 3F);
-                    	float dogTeleportDist = Math.max(GeneralConfig.followTeleportDog, 3F);
-                    	float parrotTeleportDist = Math.max(GeneralConfig.followTeleportParrot, 3F); // v2.0.0
-                    	
-                        if (
-                        		(
-                        				this.thePet instanceof EntityOcelot
-                        				&& GeneralConfig.followTeleportCat > 0 // Fixed to allow teleport disabling - v2.1.0
-                        				&& this.thePet.getDistanceSqToEntity(this.theOwner) >= (catTeleportDist*catTeleportDist)
-                        				)
-                        		||
-                        		(
-                        				this.thePet instanceof EntityWolf
-                        				&& GeneralConfig.followTeleportDog > 0 // Fixed to allow teleport disabling - v2.1.0
-                        				&& this.thePet.getDistanceSqToEntity(this.theOwner) >= (dogTeleportDist*dogTeleportDist)
-                        				)
-                        		||
-                        		( // v2.0.0
-                        				this.thePet instanceof EntityParrotNEP
-                        				&& GeneralConfig.followTeleportParrot > 0 // Fixed to allow teleport disabling - v2.1.0
-                        				&& this.thePet.getDistanceSqToEntity(this.theOwner) >= (parrotTeleportDist*parrotTeleportDist)
-                        				)
-                        		||
-                        		(
-                        				!(this.thePet instanceof EntityOcelot)
-                        				&& !(this.thePet instanceof EntityWolf)
-                        				&& !(this.thePet instanceof EntityParrotNEP) // v2.0.0
-                        				&& this.thePet.getDistanceSqToEntity(this.theOwner) >= 144.0D
-                        				)
-                        		)
+                        if (this.thePet.getDistanceSqToEntity(this.theOwner) >= 144.0D)
                         {
                             int i = MathHelper.floor_double(this.theOwner.posX) - 2;
                             int j = MathHelper.floor_double(this.theOwner.posZ) - 2;

@@ -32,12 +32,6 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.MinecraftForge;
 
-/*
- * Loot 0 sword:
- * give @p diamond_sword 1 0 {ench:[{id:16,lvl:1000},{id:34,lvl:99}]}
- * Loot 3 sword
- * give @p golden_sword 1 0 {ench:[{id:16,lvl:1000},{id:34,lvl:99},{id:21,lvl:3}]}
- */
 
 @Mod(
 		modid = Reference.MOD_ID,
@@ -103,8 +97,6 @@ public class ModNotEnoughPets
         		EnumChatFormatting.BLUE +
         		"AstroTibs");
         
-        event.getModMetadata().url = EnumChatFormatting.GRAY +
-        		Reference.URL;
         
         event.getModMetadata().description = 	// description
 	       		EnumChatFormatting.YELLOW +

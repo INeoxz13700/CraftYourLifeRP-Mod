@@ -27,6 +27,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 
 public class EntityWolfNEP extends EntityWolf implements IPetData {
@@ -177,6 +178,12 @@ public class EntityWolfNEP extends EntityWolf implements IPetData {
     public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
         super.writeEntityToNBT(tagCompound);
+        
+        tagCompound.setInteger("HomePositionX", getHomePosition().posX);
+        tagCompound.setInteger("HomePositionY", getHomePosition().posY);
+        tagCompound.setInteger("HomePositionZ", getHomePosition().posZ);
+
+        
         tagCompound.setInteger("DogType", this.getTameSkin());
         
         if(petName != null)
@@ -196,6 +203,10 @@ public class EntityWolfNEP extends EntityWolf implements IPetData {
     public void readEntityFromNBT(NBTTagCompound tagCompound)
     {
         super.readEntityFromNBT(tagCompound);
+        
+        setHomeArea(tagCompound.getInteger("HomePositionX"), tagCompound.getInteger("HomePositionY"), tagCompound.getInteger("HomePositionZ"), 16);
+
+        
         this.setTameSkin(tagCompound.getInteger("DogType"));
         
         if(tagCompound.hasKey("PetName"))
@@ -238,6 +249,10 @@ public class EntityWolfNEP extends EntityWolf implements IPetData {
     {
     	if(player.worldObj.isRemote) return true;
     	
+    	if(getOwner() != player)
+    	{
+    		return true;
+    	}
     	
     	ItemStack itemstack = player.inventory.getCurrentItem();
     	
@@ -269,9 +284,13 @@ public class EntityWolfNEP extends EntityWolf implements IPetData {
     			{
     				ServerUtils.sendChatMessage(player, "§bVotre animal ne vous suit plus");
     			}
-    			else
+    			else if(petState == 2)
     			{
     				ServerUtils.sendChatMessage(player, "§bVotre animal est en repos");
+    			}
+    			else if(petState == 3)
+    			{
+    				ServerUtils.sendChatMessage(player, "§bDéfinissez la maison de votre animal (clique droit sur un bloc)");
     			}
     			
     			setPetState(PetStateEnum.values()[petState]);
@@ -321,6 +340,9 @@ public class EntityWolfNEP extends EntityWolf implements IPetData {
 					}
         			else
         			{
+        				
+        				if(!(itemstack.getItem() instanceof ItemFood) && itemstack.getItem() != Items.milk_bucket) return true;
+
         				if(getFood() >= GeneralConfig.MAX_FOOD && getHealth() >= getMaxHealth())
         				{
             				ServerUtils.sendChatMessage(player, "§cVotre animal refuse de manger");
@@ -331,7 +353,7 @@ public class EntityWolfNEP extends EntityWolf implements IPetData {
             			{
                 			if(itemstack.getItem() != Items.milk_bucket)
                 			{
-                				ServerUtils.sendChatMessage(player, "§cVotre animal refuse de manger");
+                				ServerUtils.sendChatMessage(player, "§cLes animaux de cette âge préfèrent du lait.");
                 			}
                 			else
                 			{
@@ -378,6 +400,10 @@ public class EntityWolfNEP extends EntityWolf implements IPetData {
                     				
                     				CraftYourLifeRPMod.packetHandler.sendTo(PacketPet.playEffect(getEntityId()), (EntityPlayerMP) player);
 
+                    			}
+                    			else
+                    			{
+                    				ServerUtils.sendChatMessage(player, "§cVotre animal refuse de manger");
                     			}
                     			return true;
             				}
@@ -537,4 +563,76 @@ public class EntityWolfNEP extends EntityWolf implements IPetData {
 		int age = (int) (((System.currentTimeMillis() - getPetBirthday()) / 1000) / 31104000);
 		return age;
 	}
+
+	@Override
+	public void setTamedImplements(boolean value) {
+		this.setTamed(value);
+	}
+	
+
+	@Override
+	public void setGrowingAgeImplements(int growthTick) {
+		this.setGrowingAge(growthTick);
+	}
+	
+	@Override
+	public void setHomeAreaImplements(int x, int y, int z, int range) {
+		this.setHomeArea(x, y, z, range);
+	}
+	
+	@Override
+	public EntityLivingBase getOwnerImplements() {
+		return getOwner();
+	}
+	
+
+	@Override
+	public ChunkCoordinates getHomePositionImplements() {
+		return getHomePosition();
+	}
+	
+
+	@Override
+	public int getGrowingAgeImplements() {
+		return getGrowingAge();
+	}
+	
+	@Override
+	public boolean isSittingImplements() {
+		return isSitting();
+	}
+	
+	@Override
+	public int getAgeImplements() {
+		return getAge();
+	}
+	
+	@Override
+	public float func_110174_bM_Implements() {
+		return func_110174_bM();
+	}
+
+	@Override
+	public boolean isWithinHomeDistanceCurrentPositionImplements() {
+		return isWithinHomeDistanceCurrentPosition();
+	}
+	
+	@Override
+	public void playTameEffectImplements(boolean bool) {
+		playTameEffect(bool);
+	}
+	
+
+	@Override
+	public void func_152115_bImplements(String UUID) {
+		this.func_152115_b(UUID);
+	}
+
+	@Override
+	public EntityAISit func_70907_rImplements() {
+		return this.func_70907_r();
+	}
+
+
+
 }

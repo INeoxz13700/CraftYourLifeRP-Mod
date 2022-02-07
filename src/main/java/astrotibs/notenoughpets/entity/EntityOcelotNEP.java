@@ -13,6 +13,7 @@ import fr.craftyourliferp.network.PacketPet;
 import fr.craftyourliferp.utils.ServerUtils;
 import net.minecraft.block.BlockColored;
 import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAISit;
@@ -27,6 +28,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 
 public class EntityOcelotNEP extends EntityOcelot implements IPetData {
@@ -53,15 +55,13 @@ public class EntityOcelotNEP extends EntityOcelot implements IPetData {
 		energy = GeneralConfig.MAX_ENERGY;
 		food = GeneralConfig.MAX_FOOD;
 
-		if (GeneralConfig.followOwnerCat) {this.tasks.addTask(5, new EntityAIFollowOwnerNEP(this, 1.0D, 10.0F, 5.0F));}
-		
+		this.tasks.addTask(5, new EntityAIFollowOwnerNEP(this, 1.0D, 10.0F, 5.0F));
 	}
 	
 	@Override
 	protected void entityInit()
 	{
 		super.entityInit();
-		// A datawatcher value to represent collar color
 		this.dataWatcher.addObject(20, new Byte((byte)BlockColored.func_150032_b(1)));
 	}
 	
@@ -73,6 +73,12 @@ public class EntityOcelotNEP extends EntityOcelot implements IPetData {
     public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
         super.writeEntityToNBT(tagCompound);
+        
+        tagCompound.setInteger("HomePositionX", getHomePosition().posX);
+        tagCompound.setInteger("HomePositionY", getHomePosition().posY);
+        tagCompound.setInteger("HomePositionZ", getHomePosition().posZ);
+
+        
         tagCompound.setByte("CollarColor", (byte)this.getCollarColor());
         
         if(petName != null)
@@ -94,6 +100,8 @@ public class EntityOcelotNEP extends EntityOcelot implements IPetData {
     {
         super.readEntityFromNBT(tagCompound);
         
+        setHomeArea(tagCompound.getInteger("HomePositionX"), tagCompound.getInteger("HomePositionY"), tagCompound.getInteger("HomePositionZ"), 16);
+
         if (tagCompound.hasKey("CollarColor", 99))
         {
             this.setCollarColor(tagCompound.getByte("CollarColor"));
@@ -179,6 +187,11 @@ public class EntityOcelotNEP extends EntityOcelot implements IPetData {
     {
     	if(worldObj.isRemote) return true;
 
+    	if(getOwner() != player)
+    	{
+    		return true;
+    	}
+    	
 		ItemStack itemstack = player.inventory.getCurrentItem();
 		
 		EntityAITempt aiTempt_f = ReflectionHelper.getPrivateValue( EntityOcelot.class, this, new String[]{"aiTempt", "field_70914_e"} );
@@ -201,7 +214,6 @@ public class EntityOcelotNEP extends EntityOcelot implements IPetData {
     			if(petState <= 1 && getEnergy() < 1)
     			{
     				ServerUtils.sendChatMessage(player, "§cVotre animal est épuisé laissez le se reposer.");
-
     				return true;
     			}
     			
@@ -214,9 +226,13 @@ public class EntityOcelotNEP extends EntityOcelot implements IPetData {
     			{
     				ServerUtils.sendChatMessage(player, "§bVotre animal ne vous suit plus");
     			}
-    			else
+    			else if(petState == 2)
     			{
     				ServerUtils.sendChatMessage(player, "§bVotre animal est en repos");
+    			}
+    			else if(petState == 3)
+    			{
+    				ServerUtils.sendChatMessage(player, "§bDéfinissez la maison de votre animal (clique droit sur un bloc)");
     			}
     			
     			setPetState(PetStateEnum.values()[petState]);
@@ -267,6 +283,8 @@ public class EntityOcelotNEP extends EntityOcelot implements IPetData {
 					}
         			else
         			{
+        					if(!(itemstack.getItem() instanceof ItemFood) && itemstack.getItem() != Items.milk_bucket) return true;
+
 	        				if(getFood() >= GeneralConfig.MAX_FOOD && getHealth() >= getMaxHealth())
 	        				{
 	            				ServerUtils.sendChatMessage(player, "§cVotre animal refuse de manger");
@@ -278,7 +296,7 @@ public class EntityOcelotNEP extends EntityOcelot implements IPetData {
 	            			{
 	                			if(itemstack.getItem() != Items.milk_bucket)
 	                			{
-	                				ServerUtils.sendChatMessage(player, "§cVotre animal refuse de manger");
+	                				ServerUtils.sendChatMessage(player, "§cLes animaux de cette âge préfèrent du lait.");
 	                			}
 	                			else
 	                			{
@@ -644,4 +662,72 @@ public class EntityOcelotNEP extends EntityOcelot implements IPetData {
 		int age = (int) (((System.currentTimeMillis() - getPetBirthday()) / 1000) / 31104000);
 		return age;
 	}
+	
+	@Override
+	public void setTamedImplements(boolean value)
+	{
+		this.setTamed(value);
+	}
+
+	@Override
+	public void setGrowingAgeImplements(int growthTick) {
+		this.setGrowingAge(growthTick);
+	}
+	
+	@Override
+	public void setHomeAreaImplements(int x, int y, int z, int range) {
+		this.setHomeArea(x, y, z, range);
+	}
+
+	@Override
+	public EntityLivingBase getOwnerImplements() {
+		return getOwner();
+	}
+
+	@Override
+	public ChunkCoordinates getHomePositionImplements() {
+		return getHomePosition();
+	}
+
+	@Override
+	public int getGrowingAgeImplements() {
+		return getGrowingAge();
+	}
+	
+
+	@Override
+	public boolean isSittingImplements() {
+		return isSitting();
+	}
+
+	@Override
+	public int getAgeImplements() {
+		return getAge();
+	}
+
+	@Override
+	public float func_110174_bM_Implements() {
+		return func_110174_bM();
+	}
+
+	@Override
+	public boolean isWithinHomeDistanceCurrentPositionImplements() {
+		return isWithinHomeDistanceCurrentPosition();
+	}
+
+	@Override
+	public void playTameEffectImplements(boolean bool) {
+		playTameEffect(bool);
+	}
+
+	@Override
+	public void func_152115_bImplements(String UUID) {
+		this.func_152115_b(UUID);
+	}
+
+	@Override
+	public EntityAISit func_70907_rImplements() {
+		return this.func_70907_r();
+	}
+	
 }
