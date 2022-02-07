@@ -2768,8 +2768,11 @@ public abstract class EntityDriveable extends Entity implements IControllable, I
 		        	ExtendedPlayer ep = ExtendedPlayer.get(ownerP);
 		        	if(ep != null)
 		        	{
-		        		int id = Item.getIdFromItem(attribuatedItemStack.getItem());
-		        		if(attribuatedItemStack != null) ep.explodedVehicles.put(id, DriveableDestroyed.destroyVehicle(id));
+		        		if(attribuatedItemStack != null) 
+		        		{
+			        		int id = Item.getIdFromItem(attribuatedItemStack.getItem());
+		        			ep.explodedVehicles.put(id, DriveableDestroyed.destroyVehicle(id));
+		        		}
 		        	}
 		        }
 
