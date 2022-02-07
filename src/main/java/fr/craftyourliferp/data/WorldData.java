@@ -24,12 +24,16 @@ import fr.craftyourliferp.network.PacketSendSms;
 import fr.craftyourliferp.utils.HTTPUtils;
 import fr.craftyourliferp.utils.ServerUtils;
 import fr.craftyourliferp.utils.StringUtils;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockBed;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
@@ -46,6 +50,7 @@ public class WorldData extends WorldSavedData {
 	
 	private List<WorldSelector> explosionRegion = new ArrayList();
 	private List<WorldSelector> fireRegion = new ArrayList();
+	public HashMap<ChunkCoordinates, String> hospitalBeds = new HashMap(); 
 	public HashMap<WorldSelector, CaptureProcess> capturesProcess = new HashMap<WorldSelector, CaptureProcess>();
 
 	private BlackMarketData marketData = new BlackMarketData();
@@ -131,6 +136,20 @@ public class WorldData extends WorldSavedData {
 			}
 		}
 		
+		tagsList = (NBTTagList) nbt.getTag("HospitalBeds");
+		if(tagsList != null)
+		{
+			for(int i = 0; i < tagsList.tagCount(); i++)
+			{
+				NBTTagCompound compound = tagsList.getCompoundTagAt(i);
+				ChunkCoordinates coordinates = new ChunkCoordinates(compound.getInteger("x"),compound.getInteger("y"),compound.getInteger("z"));
+				String name = compound.getString("Name");
+				hospitalBeds.put(coordinates, name);
+			}
+		}
+		
+		
+		
 		tagsList = (NBTTagList) nbt.getTag("Captures");
 		if(tagsList != null)
 		{
@@ -139,7 +158,6 @@ public class WorldData extends WorldSavedData {
 				NBTTagCompound compound = tagsList.getCompoundTagAt(i);
 				WorldSelector selector = new WorldSelector(worldObj);
 				selector.readFromNbt(compound);
-				System.out.println("ici");
 				CaptureProcess process = CraftYourLifeRPMod.captureHander.getCaptureProcessFromId(compound.getInteger("CaptureType"));
 				process.readFromNbt(compound);
 				capturesProcess.put(selector, process);
@@ -205,6 +223,18 @@ public class WorldData extends WorldSavedData {
 			}
 		}
 		nbt.setTag("FireRegions", tagsList);
+		
+		tagsList = new NBTTagList();
+		for(Map.Entry<ChunkCoordinates, String> coordinates : hospitalBeds.entrySet())
+		{
+			NBTTagCompound coordinatesTag = new NBTTagCompound();
+			coordinatesTag.setInteger("x", coordinates.getKey().posX);
+			coordinatesTag.setInteger("y", coordinates.getKey().posY);
+			coordinatesTag.setInteger("z", coordinates.getKey().posZ);
+			coordinatesTag.setString("Name", coordinates.getValue());
+			tagsList.appendTag(coordinatesTag);
+		}
+		nbt.setTag("HospitalBeds", tagsList);
 		
 		tagsList = new NBTTagList();
 		for (Map.Entry<WorldSelector, CaptureProcess> entry : capturesProcess.entrySet()) {
@@ -410,6 +440,39 @@ public class WorldData extends WorldSavedData {
 		explosionRegion.add(regionBuilder);
 				
 		markDirty();		
+	}
+	
+	public boolean addHospitalBed(ChunkCoordinates coordinates, String name)
+	{		
+		if(hospitalBeds.containsKey(coordinates)) return false;
+		
+		Block block = worldObj.getBlock(coordinates.posX, coordinates.posY, coordinates.posZ);
+
+		if(block instanceof BlockBed)
+		{
+			BlockBed bed = (BlockBed) block;
+			if(!bed.isBlockHeadOfBed(worldObj.getBlockMetadata(coordinates.posX, coordinates.posY, coordinates.posZ)))
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+		hospitalBeds.put(coordinates,name);
+		
+		markDirty();		
+		return true;
+	}
+	
+	public boolean removeHospitalBed(ChunkCoordinates coordinates)
+	{
+		if(!hospitalBeds.containsKey(coordinates)) return false;
+		
+		hospitalBeds.remove(coordinates);
+		markDirty();
+		return true;
 	}
 	
 	public void addCaptureRegion(EntityPlayer player, int captureType, WorldSelector regionBuilder)
