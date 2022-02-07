@@ -134,7 +134,7 @@ public class MinecraftUtils {
 			    	for(int y = (int)Math.floor(axis.minY); y < axis.maxY; y++)
 			    	{
 			    		Block block = world.getBlock(x, y, z);
-			    		if(block == Blocks.air) continue;
+			    		if(block == Blocks.air || block == Blocks.water || block == Blocks.flowing_water) continue;
 			    		
 			    		AxisAlignedBB blockAxis = block.getCollisionBoundingBoxFromPool(world, x, y, z);
 			    		if(blockAxis == null) return true;
