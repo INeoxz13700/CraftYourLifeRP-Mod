@@ -1151,7 +1151,7 @@ public class EventsListener {
         	AxisAlignedBB axis = null;
         	
         	if(extendedPlayer.isProning()) axis = AxisAlignedBB.getBoundingBox(p.boundingBox.minX, p.boundingBox.minY, p.boundingBox.minZ, p.boundingBox.minX + 0.8F, p.boundingBox.minY + 1.8F, p.boundingBox.minZ + 0.8F);
-        	else axis = AxisAlignedBB.getBoundingBox(p.boundingBox.minX, p.boundingBox.minY, p.boundingBox.minZ, p.boundingBox.minX + 0.8F, p.boundingBox.minY + 0.6F, p.boundingBox.minZ + 0.8F);
+        	else axis = AxisAlignedBB.getBoundingBox(p.boundingBox.minX-0.4F, p.boundingBox.minY, p.boundingBox.minZ-0.4F, p.boundingBox.minX + 0.8F, p.boundingBox.minY + 0.6F, p.boundingBox.minZ + 0.8F);
         	
         	if(MinecraftUtils.boundingBoxCollide(p.worldObj, axis))
         	{
