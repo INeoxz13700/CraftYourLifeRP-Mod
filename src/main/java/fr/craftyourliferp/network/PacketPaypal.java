@@ -477,13 +477,12 @@ public class PacketPaypal extends PacketBase
 				}
 				CraftYourLifeRPMod.packetHandler.sendTo(PacketPaypal.syncPaypalData(playerEntity), playerEntity);*/
 				
-				ExtendedPlayer cachedData = CraftYourLifeRPMod.getClientData().cachedData;
 				
-				cachedData.updatePlayerData();
+				extendedPlayer.updatePlayerData();
 
 				if(extendedPlayer.paypalData.isAuthentified)
 				{
-					cachedData.syncData();
+					extendedPlayer.syncData();
 				}
 				CraftYourLifeRPMod.packetHandler.sendTo(PacketPaypal.syncPaypalData(playerEntity), playerEntity);
 			}
