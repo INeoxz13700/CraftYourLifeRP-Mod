@@ -53,7 +53,7 @@ public class PlayerHandler
 		EntityLivingBase entity = event.entityLiving;
 		if(event instanceof LivingAttackEvent && (entity.ridingEntity instanceof EntityDriveable || entity.ridingEntity instanceof EntitySeat))
 		{
-			event.setCanceled(true);
+			if(!event.source.getDamageType().equals("alcol")) event.setCanceled(true);
 		}
 	}
 
