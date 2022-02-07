@@ -2,6 +2,7 @@ package fr.craftyourliferp.ingame.gui;
 
 import fr.craftyourliferp.data.PlayerCachedData;
 import fr.craftyourliferp.main.CraftYourLifeRPMod;
+import fr.craftyourliferp.main.ExtendedPlayer;
 import fr.craftyourliferp.network.PacketSleeping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -9,6 +10,7 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.play.client.C0BPacketEntityAction;
 
 public class GuiSleeping extends GuiScreen {
@@ -19,7 +21,16 @@ public class GuiSleeping extends GuiScreen {
     public void initGui()
     {
         super.initGui();
-        this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height - 40, I18n.format("multiplayer.stopSleeping", new Object[0])));
+        ExtendedPlayer extendedPlayer = ExtendedPlayer.get(mc.thePlayer);
+        if(extendedPlayer.getShouldBeReanimate() || extendedPlayer.shouldBeInEthylicComa())
+        {
+            this.buttonList.add(new GuiButton(1, (this.width / 2) - 200, this.height - 40, I18n.format("multiplayer.stopSleeping", new Object[0])));
+            this.buttonList.add(new GuiButton(2, this.width / 2, this.height - 40, "§cMort subite"));
+        }
+        else
+        {
+            this.buttonList.add(new GuiButton(1, this.width / 2 - 100, this.height - 40, I18n.format("multiplayer.stopSleeping", new Object[0])));
+        }
     }
 
     /**
@@ -43,6 +54,10 @@ public class GuiSleeping extends GuiScreen {
         {
         	unSleep();
         }
+        else if(p_146284_1_.id == 2)
+        {
+        	subitDeath();
+        }
         else
         {
             super.actionPerformed(p_146284_1_);
@@ -52,6 +67,22 @@ public class GuiSleeping extends GuiScreen {
     private void unSleep()
     {
         CraftYourLifeRPMod.packetHandler.sendToServer(PacketSleeping.unSleep());
+    }
+    
+    private void subitDeath()
+    {
+        CraftYourLifeRPMod.packetHandler.sendToServer(PacketSleeping.subitDeath());
+    }
+    
+    public boolean doesGuiPauseGame()
+    {
+        return false;
+    }
+    
+    public void updateGui()
+    {
+    	this.buttonList.clear();
+    	this.initGui();
     }
 
 	
