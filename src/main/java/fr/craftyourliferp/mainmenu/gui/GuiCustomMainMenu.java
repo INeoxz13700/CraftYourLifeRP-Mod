@@ -59,9 +59,9 @@ import scala.collection.concurrent.Debug;
 @SideOnly(Side.CLIENT)
 public class GuiCustomMainMenu extends GuiBase {
 		
-    public ResourceLocation background = new ResourceLocation(CraftYourLifeRPMod.name + ":gui/mainmenu/background_noel.png");
+    //public ResourceLocation background = new ResourceLocation(CraftYourLifeRPMod.name + ":gui/mainmenu/background_noel.png");
     //public ResourceLocation background = new ResourceLocation(CraftYourLifeRPMod.name + ":gui/mainmenu/background_halloween.png");
-	//public ResourceLocation background = new ResourceLocation(CraftYourLifeRPMod.name + ":gui/mainmenu/background.png");
+	public ResourceLocation background = new ResourceLocation(CraftYourLifeRPMod.name + ":gui/mainmenu/background.png");
 
 	public UIReader uiReader;	
 	
@@ -227,8 +227,8 @@ public class GuiCustomMainMenu extends GuiBase {
 	{
     	UIRect rect = (UIRect)addComponent(new UIRect(new UIColor("#FFFFFF")).setPosition(0, 0, getWindowWidth(), getWindowHeight()));
     	
-    	//addComponent(new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/logo.png")).setPosition(4, 3, 35, 35));
-    	addComponent(new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/logon.png")).setPosition(4, 3, 35, 35));
+    	addComponent(new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/logo.png")).setPosition(4, 3, 35, 35));
+    	//addComponent(new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/logon.png")).setPosition(4, 3, 35, 35));
     	//addComponent(new UIAnimatedImage(7,"craftyourliferp:gui/mainmenu","logoh-frame", "png",4)).setPosition(4, 3, 35, 35);
 
     	UIRect registerBtnRect = new UIRect(new UIColor("#FFFFFF"),new UIColor(234, 127, 51));
@@ -375,8 +375,8 @@ class PresentationContainer extends GraphicObject
 		this.parent = parent;
 		containerBackground = new UIImage(parent.background);
 		text = new UIText("CraftYourLifeRP - Version " + CraftYourLifeRPMod.getClientData().version,new UIColor(234, 127, 51),1.8f);
-		//logo = new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/logo.png")); 
-		logo = new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/logon.png")); 
+		logo = new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/logo.png")); 
+		//logo = new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/logon.png")); 
 		//logo = new UIAnimatedImage(7,"craftyourliferp:gui/mainmenu","logoh-frame", "png",4);
 	}
 	

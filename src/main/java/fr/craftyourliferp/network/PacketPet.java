@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import astrotibs.notenoughpets.entity.IPetData;
 import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import fr.craftyourliferp.ingame.gui.GuiNamePet;
 import fr.craftyourliferp.utils.ServerUtils;
 import io.netty.buffer.ByteBuf;
@@ -138,6 +140,7 @@ public class PacketPet extends PacketBase {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public void handleClientSide(EntityPlayer clientPlayer)
 	{
 		if(type == 0)
@@ -167,7 +170,7 @@ public class PacketPet extends PacketBase {
 			if(entity instanceof IPetData)
 			{
 				IPetData petData = (IPetData)entity;
-				petData.playTameEffect(true);
+				petData.playTameEffectImplements(true);
 			}
 		}
 	}

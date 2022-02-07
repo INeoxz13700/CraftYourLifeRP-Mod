@@ -17,11 +17,14 @@ import fr.craftyourliferp.animations.PlayerAnimator;
 import fr.craftyourliferp.data.PlayerCachedData;
 import fr.craftyourliferp.game.events.RendererListener;
 import fr.craftyourliferp.game.events.TicksHandler;
+import fr.craftyourliferp.ingame.gui.GuiInventoryRP;
+import fr.craftyourliferp.ingame.gui.GuiSkin;
 import fr.craftyourliferp.items.ModdedItems;
 import fr.craftyourliferp.main.CraftYourLifeRPMod;
 import fr.craftyourliferp.main.ExtendedPlayer;
 import fr.craftyourliferp.utils.MathsUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiContainerCreative;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.entity.Entity;
@@ -55,179 +58,6 @@ public class CustomModelPlayer extends ModelPlayerBase
 		super.setRotationAngles(paramFloat1, paramFloat2, paramFloat3, paramFloat4, paramFloat5, paramFloat6, paramEntity);
 		
 		
-		/*if(paramEntity instanceof EntityPlayer)
-		{
-			EntityPlayer player = (EntityPlayer) paramEntity;
-			
-			PlayerCachedData data = PlayerCachedData.getData(player);
-			
-			if(data != null)
-			{
-				if(data.isProning())
-				{
-					//Step1
-					//Head
-					this.modelPlayer.bipedHeadwear.offsetY = 1.4F;
-
-					this.modelPlayer.bipedHead.offsetY = 1.4F;
-					
-					//Body
-					this.modelPlayer.bipedCloak.rotateAngleX = MathsUtils.Deg2Rad * 275;
-					this.modelPlayer.bipedBody.rotateAngleX = MathsUtils.Deg2Rad * 90;
-					this.modelPlayer.bipedCloak.offsetY = 0.05F;
-					this.modelPlayer.bipedBody.offsetY = 1.4F;
-					
-					//Legs
-					this.modelPlayer.bipedLeftLeg.rotateAngleX = MathsUtils.Deg2Rad * 90;
-					this.modelPlayer.bipedRightLeg.rotateAngleX = MathsUtils.Deg2Rad * 90;
-
-			
-					this.modelPlayer.bipedLeftLeg.offsetZ = 0.75F;
-					this.modelPlayer.bipedLeftLeg.offsetY = 0.7F;
-
-					this.modelPlayer.bipedRightLeg.offsetZ = 0.75F;
-					this.modelPlayer.bipedRightLeg.offsetY = 0.7F;
-
-					this.modelPlayer.bipedLeftLeg.rotateAngleY = MathsUtils.Deg2Rad * 10;
-					this.modelPlayer.bipedRightLeg.rotateAngleY = MathsUtils.Deg2Rad * -10;
-					
-					//Arms
-					Minecraft mc = Minecraft.getMinecraft();
-					if(mc.thePlayer == player && mc.gameSettings.thirdPersonView != 0)
-					{
-						this.modelPlayer.bipedLeftArm.offsetY = 1.25F;
-						this.modelPlayer.bipedRightArm.offsetY = 1.25F;
-						
-						
-						this.modelPlayer.bipedLeftArm.offsetZ = (float) (0.05F - Math.sin(TicksHandler.ticks * 0.25041F) * 0.2025F * paramFloat2);
-						this.modelPlayer.bipedRightArm.offsetZ = (float) (0.05F + Math.sin(TicksHandler.ticks * 0.25041F) * 0.2025F * paramFloat2);
-						
-
-						if(!modelPlayer.aimedBow || player.getHeldItem() == null)
-						{
-							this.modelPlayer.bipedLeftArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-							this.modelPlayer.bipedRightArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-						}
-						
-					}
-					else if(mc.thePlayer != player)
-					{
-						this.modelPlayer.bipedLeftArm.offsetY = 1.25F;
-						this.modelPlayer.bipedRightArm.offsetY = 1.25F;
-				
-						this.modelPlayer.bipedLeftArm.offsetZ = (float) (0.05F - Math.sin(TicksHandler.ticks * 0.25041F) * 0.2025F * paramFloat2);
-						this.modelPlayer.bipedRightArm.offsetZ = (float) (0.05F + Math.sin(TicksHandler.ticks * 0.25041F) * 0.2025F * paramFloat2);
-						
-
-						if(!modelPlayer.aimedBow || player.getHeldItem() == null)
-						{
-							this.modelPlayer.bipedLeftArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-							this.modelPlayer.bipedRightArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-						}
-
-					}
-					else if(mc.currentScreen != null)
-					{
-						if(player.getHeldItem() == null)
-						{
-							this.modelPlayer.bipedLeftArm.offsetY = 1.25F;
-							this.modelPlayer.bipedRightArm.offsetY = 1.25F;
-							
-							
-							this.modelPlayer.bipedLeftArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-							this.modelPlayer.bipedRightArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-						}
-						else
-						{
-							this.modelPlayer.bipedLeftArm.offsetY = 1.25F;
-							this.modelPlayer.bipedRightArm.offsetY = 1.25F;
-
-							this.modelPlayer.bipedLeftArm.rotateAngleZ = 0f;
-							this.modelPlayer.bipedRightArm.rotateAngleZ = 0f;
-							
-							this.modelPlayer.bipedLeftArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-							this.modelPlayer.bipedRightArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-						}
-
-					}
-					else
-					{
-
-						resetTransformations();
-					}
-
-				}
-				else if(data.currentAnimation != 0)
-				{
-					
-					if(data.currentPlayingAnimation != null)
-					{
-						if(!data.currentPlayingAnimation.getAnimationisPlaying())
-						{
-							if(data.currentPlayingAnimation != null) 
-							{
-								resetTransformations();
-
-								data.currentPlayingAnimation.startAnimation(modelPlayer,data);
-							}
-						}
-												
-						if(data.currentPlayingAnimation != null) data.currentPlayingAnimation.applyAnimation(modelPlayer,data,player);
-					}
-				}
-				else
-				{
-					if(data.currentPlayingAnimation != null)
-					{
-						data.currentPlayingAnimation.stopAnimation(modelPlayer,data);
-					}
-					resetTransformations();
-				}
-			}
-
-			if(player.getHeldItem() != null)
-			{
-				if(player.getHeldItem().getItem() == ModdedItems.extincteur)
-				{
-					this.modelPlayer.bipedLeftArm.rotateAngleZ = MathsUtils.Deg2Rad * 30;
-					this.modelPlayer.bipedLeftArm.rotateAngleX = MathsUtils.Deg2Rad * -50;
-					
-					this.modelPlayer.heldItemLeft = 0;
-					this.modelPlayer.bipedRightArm.rotateAngleZ = MathsUtils.Deg2Rad * -30;
-					this.modelPlayer.bipedRightArm.rotateAngleX = MathsUtils.Deg2Rad * -50;
-				}
-				else if(player.getHeldItem().getItem() == ModdedItems.itemBulletproofShield)
-				{
-					if(data.isUsingItem())
-					{
-						animation.setState(0);
-						animation.playAnimation(this, player.getHeldItem(), player);
-						this.modelPlayer.bipedRightArm.rotateAngleZ = rotationZ * MathsUtils.Deg2Rad;
-					}
-					else
-					{
-						this.modelPlayer.bipedRightArm.rotateAngleY = rotationY * MathsUtils.Deg2Rad;
-
-						animation.setInitial(this);
-					}
-
-					if(data.isProning())
-					{
-						this.modelPlayer.bipedRightArm.rotateAngleX = MathsUtils.Deg2Rad * -120;
-					}
-					else
-					{
-						if(player.rotationPitch <= 70) this.modelPlayer.bipedRightArm.rotateAngleX = MathsUtils.Deg2Rad * player.rotationPitch - 10 * 2;
-						else this.modelPlayer.bipedRightArm.rotateAngleX = MathsUtils.Deg2Rad * 5.34f * 2;
-					}
-					
-				}
-
-			}
-			
-		
-		}*/
-		
 		if(paramEntity instanceof EntityPlayer)
 		{
 			resetTransformations();
@@ -239,23 +69,26 @@ public class CustomModelPlayer extends ModelPlayerBase
 			{
 				if(data.isProning())
 				{
+					Minecraft mc = Minecraft.getMinecraft();
+
+					
 					//Step1
 					//Head
 					this.modelPlayer.bipedHeadwear.offsetY = 1.4F;
 
 					this.modelPlayer.bipedHead.offsetY = 1.4F;
-					
+						
 					//Body
 					this.modelPlayer.bipedCloak.rotateAngleX = MathsUtils.Deg2Rad * 275;
 					this.modelPlayer.bipedBody.rotateAngleX = MathsUtils.Deg2Rad * 90;
 					this.modelPlayer.bipedCloak.offsetY = 0.05F;
 					this.modelPlayer.bipedBody.offsetY = 1.4F;
-					
+						
 					//Legs
 					this.modelPlayer.bipedLeftLeg.rotateAngleX = MathsUtils.Deg2Rad * 90;
 					this.modelPlayer.bipedRightLeg.rotateAngleX = MathsUtils.Deg2Rad * 90;
 
-			
+				
 					this.modelPlayer.bipedLeftLeg.offsetZ = 0.75F;
 					this.modelPlayer.bipedLeftLeg.offsetY = 0.7F;
 
@@ -264,34 +97,33 @@ public class CustomModelPlayer extends ModelPlayerBase
 
 					this.modelPlayer.bipedLeftLeg.rotateAngleY = MathsUtils.Deg2Rad * 10;
 					this.modelPlayer.bipedRightLeg.rotateAngleY = MathsUtils.Deg2Rad * -10;
-					
+						
 					//Arms
-					Minecraft mc = Minecraft.getMinecraft();
 					if(mc.thePlayer == player && mc.gameSettings.thirdPersonView != 0)
 					{
 						this.modelPlayer.bipedLeftArm.offsetY = 1.25F;
 						this.modelPlayer.bipedRightArm.offsetY = 1.25F;
-						
-						
+							
+							
 						this.modelPlayer.bipedLeftArm.offsetZ = (float) (0.05F - Math.sin(TicksHandler.ticks * 0.25041F) * 0.2025F * paramFloat2);
 						this.modelPlayer.bipedRightArm.offsetZ = (float) (0.05F + Math.sin(TicksHandler.ticks * 0.25041F) * 0.2025F * paramFloat2);
-						
+							
 
 						if(!modelPlayer.aimedBow || player.getHeldItem() == null)
 						{
 							this.modelPlayer.bipedLeftArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
 							this.modelPlayer.bipedRightArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
 						}
-						
+							
 					}
 					else if(mc.thePlayer != player)
 					{
 						this.modelPlayer.bipedLeftArm.offsetY = 1.25F;
 						this.modelPlayer.bipedRightArm.offsetY = 1.25F;
-				
+					
 						this.modelPlayer.bipedLeftArm.offsetZ = (float) (0.05F - Math.sin(TicksHandler.ticks * 0.25041F) * 0.2025F * paramFloat2);
 						this.modelPlayer.bipedRightArm.offsetZ = (float) (0.05F + Math.sin(TicksHandler.ticks * 0.25041F) * 0.2025F * paramFloat2);
-						
+							
 
 						if(!modelPlayer.aimedBow || player.getHeldItem() == null)
 						{
@@ -300,38 +132,8 @@ public class CustomModelPlayer extends ModelPlayerBase
 						}
 
 					}
-					else if(mc.currentScreen != null)
-					{
-						if(player.getHeldItem() == null)
-						{
-							this.modelPlayer.bipedLeftArm.offsetY = 1.25F;
-							this.modelPlayer.bipedRightArm.offsetY = 1.25F;
-							
-							
-							this.modelPlayer.bipedLeftArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-							this.modelPlayer.bipedRightArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-						}
-						else
-						{
-							this.modelPlayer.bipedLeftArm.offsetY = 1.25F;
-							this.modelPlayer.bipedRightArm.offsetY = 1.25F;
-
-							this.modelPlayer.bipedLeftArm.rotateAngleZ = 0f;
-							this.modelPlayer.bipedRightArm.rotateAngleZ = 0f;
-							
-							this.modelPlayer.bipedLeftArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-							this.modelPlayer.bipedRightArm.rotateAngleX = MathsUtils.Deg2Rad * 270;
-						}
-
-					}
-					/*else
-					{
-
-						resetTransformations();
-					}*/
-
 				}
-				else if(data.currentAnimation != 0)
+				if(data.currentAnimation != 0)
 				{
 					
 					if(data.currentPlayingAnimation != null)
@@ -398,9 +200,10 @@ public class CustomModelPlayer extends ModelPlayerBase
 			
 		
 		}
+	}
 
 			
-	}
+	
 
 	
 	public void resetTransformations()

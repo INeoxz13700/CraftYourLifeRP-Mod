@@ -68,7 +68,7 @@ public class CommandIdentity implements ICommand {
     				if(args.length >= 2 && !args[1].isEmpty())
     				{
     					EntityPlayerMP victim = (EntityPlayerMP)world.getPlayerEntityByName(args[1]);
-    					
+    					 
     					if(victim == null)
     					{
     						ServerUtils.sendChatMessage(sender, "§CJoueur introuvable");

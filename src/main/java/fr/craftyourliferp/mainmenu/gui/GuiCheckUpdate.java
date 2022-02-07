@@ -54,8 +54,8 @@ public class GuiCheckUpdate extends GuiBase
 	@Override
 	public void initializeComponent() 
 	{ 
-		this.addComponent(new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/background_noel.png")).setPosition(0, 0, width, height));
-		//this.addComponent(new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/background.png")).setPosition(0, 0, width, height));
+		//this.addComponent(new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/background_noel.png")).setPosition(0, 0, width, height));
+		this.addComponent(new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/background.png")).setPosition(0, 0, width, height));
 		//this.addComponent(new UIImage(new ResourceLocation("craftyourliferp","gui/mainmenu/background_halloween.png")).setPosition(0, 0, width, height));
 
 		this.addComponent(new UIRect(new UIColor(0,0,0,150)).setPosition(0, 0, width, height));

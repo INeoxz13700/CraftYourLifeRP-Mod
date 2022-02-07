@@ -1,20 +1,16 @@
 package fr.craftyourliferp.ingame.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
-import cpw.mods.fml.relauncher.ReflectionHelper;
-import fr.craftyourliferp.utils.GuiUtils;
+import fr.craftyourliferp.main.ExtendedPlayer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.achievement.GuiAchievements;
 import net.minecraft.client.gui.achievement.GuiStats;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiContainerCreative;
-import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -24,14 +20,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.GuiScreenEvent.ActionPerformedEvent;
-import net.minecraftforge.common.MinecraftForge;
-import tconstruct.client.tabs.AbstractTab;
 import tconstruct.client.tabs.InventoryTabVanilla;
 import tconstruct.client.tabs.TabRegistry;
 
-public class GuiInventoryRP extends GuiContainer {
+public class GuiInventoryRP extends GuiCustomContainer {
 
+    protected static final ResourceLocation field_147001_a = new ResourceLocation("craftyourliferp","textures/gui/container/inventory.png");
 
     /** x size of the inventory window in pixels. Defined as  float, passed as int */
     private float xSizeFloat;
@@ -39,150 +33,72 @@ public class GuiInventoryRP extends GuiContainer {
     private float ySizeFloat;
     private static final String __OBFID = "CL_00000761";
 
-    private List<AbstractTab> buttons = new ArrayList<AbstractTab>();
-    
-    private static final ResourceLocation containerTexture = new ResourceLocation("craftyourliferp","textures/gui/container/inventory.png");
+    public GuiInventoryRP(EntityPlayer p_i1094_1_)
+    {
+        super(p_i1094_1_.inventoryContainer);
+        this.allowUserInput = true;
+    }
 
-	public GuiInventoryRP(EntityPlayer player)
-	{
-		super(player.inventoryContainer);
-		ySize = ySize + 7;
-	}
-    
     /**
      * Called from the main game loop to update the screen.
      */
-    @Override
     public void updateScreen()
     {
-    	this.buttonList.clear();
         if (this.mc.playerController.isInCreativeMode())
         {
-            this.mc.displayGuiScreen(new CustomGuiContainerCreative(this.mc.thePlayer));
+            this.mc.displayGuiScreen(new GuiContainerCreative(this.mc.thePlayer));
         }
     }
 
     /**
      * Adds the buttons (and other controls) to the screen in question.
      */
-    @Override
     public void initGui()
     {
-    	this.buttons.clear();
-    	this.buttonList.clear();
-    	int xSize = 176;
-    	int ySize = 166;
-    	int guiLeft = (width - xSize) / 2;
-    	int guiTop = (height - ySize) / 2;
-    	TabRegistry.updateTabValues(guiLeft, guiTop, InventoryTabVanilla.class);
-    	TabRegistry.addTabsToList(buttons);
-    	if (this.mc.playerController.isInCreativeMode())
+        this.buttonList.clear();
+
+        if (this.mc.playerController.isInCreativeMode())
         {
-            this.mc.displayGuiScreen(new CustomGuiContainerCreative(this.mc.thePlayer));
+            this.mc.displayGuiScreen(new GuiContainerCreative(this.mc.thePlayer));
         }
         else
         {
+            int xSize = 176;
+            int ySize = 166;
+            int guiLeft = (width - xSize) / 2;
+            int guiTop  =  (height - ySize) / 2;
+            TabRegistry.addTabsToList(buttonList);
+            TabRegistry.updateTabValues(guiLeft, guiTop, InventoryTabVanilla.class);
             super.initGui();
         }
+        
     }
 
     /**
      * Draw the foreground layer for the GuiContainer (everything in front of the items)
      */
-    @Override
-    protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_)
-    {
-        this.fontRendererObj.drawString("Armement", 118, 8, 4210752);
-    }
-    
-    @Override
-    protected void drawGuiContainerBackgroundLayer(float p_146976_1_, int p_146976_2_, int p_146976_3_)
-    {
-    	for(GuiButton button : buttons)
-    	{
-    		button.drawButton(this.mc, button.xPosition, button.yPosition);
-    	}
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(containerTexture);
-        int k = this.guiLeft;
-        int l = this.guiTop+2;
-        this.drawTexturedModalRect(k, l, 0, 0, this.xSize, this.ySize);
-        func_147046_a(k + 51, l + 75, 30, (float)(k + 51) - this.xSizeFloat, (float)(l + 75 - 50) - this.ySizeFloat, this.mc.thePlayer);
-
-    }
-
+    protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) { }
 
     /**
      * Draws the screen and all the components in it.
      */
-    @Override
-    public void drawScreen(int mouseX, int mouseY, float p_73863_3_)
+    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
     {
+        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        this.xSizeFloat = (float)p_73863_1_;
+        this.ySizeFloat = (float)p_73863_2_;
+    }
 
-
-        super.drawScreen(mouseX, mouseY, p_73863_3_);
+    protected void drawGuiContainerBackgroundLayer(float p_146976_1_, int p_146976_2_, int p_146976_3_)
+    {
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        this.mc.getTextureManager().bindTexture(field_147001_a);
         int k = this.guiLeft;
         int l = this.guiTop;
-        RenderHelper.enableGUIStandardItemLighting();
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float)k, (float)l, 0.0F);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-        short short1 = 240;
-        short short2 = 240;
-        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)short1 / 1.0F, (float)short2 / 1.0F);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        int k1;
-        for (int i1 = 0; i1 < 2; ++i1)
-        {
-            Slot slot = (Slot)this.inventorySlots.inventorySlots.get(31+i1);
-
-            GL11.glDisable(GL11.GL_LIGHTING);
-            GL11.glDisable(GL11.GL_DEPTH_TEST);
-            
-            if(!slot.getHasStack())
-            {
-            	if(i1 == 0) GuiUtils.drawImage(slot.xDisplayPosition, slot.yDisplayPosition, slot.getBackgroundIconTexture(), 16*3+3, 16);
-                else if(i1 == 1) GuiUtils.drawImage(slot.xDisplayPosition + (16*3+3) / 2 - 10, slot.yDisplayPosition, slot.getBackgroundIconTexture(), 20, 16);
-            }
-            
-            GL11.glColorMask(true, true, true, true);
-            GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL11.GL_DEPTH_TEST);
-            if (this.isMouseOverSlot(slot, mouseX, mouseY) && slot.func_111238_b())
-            {
-                ReflectionHelper.setPrivateValue(GuiContainer.class, this, slot, 6);
-                GL11.glDisable(GL11.GL_LIGHTING);
-                GL11.glDisable(GL11.GL_DEPTH_TEST);
-                int j1 = slot.xDisplayPosition;
-                k1 = slot.yDisplayPosition;
-                GL11.glColorMask(true, true, true, false);
-
-                if(mouseX-k1 > j1+16)
-                this.drawGradientRect(j1, k1, j1 + 16*3+4, k1 + 16, -2130706433, -2130706433);
-
-                GL11.glColorMask(true, true, true, true);
-                GL11.glEnable(GL11.GL_LIGHTING);
-                GL11.glEnable(GL11.GL_DEPTH_TEST);
-                
-            }
-
-            
-        }
-        GL11.glDisable(GL11.GL_LIGHTING);
-        GL11.glPopMatrix();
-        
-
-
-        this.xSizeFloat = (float)mouseX;
-        this.ySizeFloat = (float)mouseY;
+        this.drawTexturedModalRect(k, l, 0, 0, this.xSize, this.ySize);
+        func_147046_a(k + 51, l + 75, 30, (float)(k + 51) - this.xSizeFloat, (float)(l + 75 - 50) - this.ySizeFloat, this.mc.thePlayer);
     }
 
-    private boolean isMouseOverSlot(Slot slot, int x, int y)
-    {
-        return this.func_146978_c(slot.xDisplayPosition, slot.yDisplayPosition, 16*3+3, 16, x, y);
-    }
-    
     public static void func_147046_a(int p_147046_0_, int p_147046_1_, int p_147046_2_, float p_147046_3_, float p_147046_4_, EntityLivingBase p_147046_5_)
     {
         GL11.glEnable(GL11.GL_COLOR_MATERIAL);
@@ -219,10 +135,7 @@ public class GuiInventoryRP extends GuiContainer {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
     }
-    
-    
 
-    @Override
     protected void actionPerformed(GuiButton p_146284_1_)
     {
         if (p_146284_1_.id == 0)
@@ -236,30 +149,9 @@ public class GuiInventoryRP extends GuiContainer {
         }
     }
     
-    @Override
     protected void mouseClicked(int p_73864_1_, int p_73864_2_, int p_73864_3_)
     {
-    	super.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
-        if (p_73864_3_ == 0)
-        {
-            for (int l = 0; l < this.buttons.size(); ++l)
-            {
-                GuiButton guibutton = (GuiButton)this.buttons.get(l);
-
-                if (guibutton.mousePressed(this.mc, p_73864_1_, p_73864_2_))
-                {
-                    ActionPerformedEvent.Pre event = new ActionPerformedEvent.Pre(this, guibutton, this.buttonList);
-                    if (MinecraftForge.EVENT_BUS.post(event))
-                        break;
-                    ReflectionHelper.setPrivateValue(GuiScreen.class, this, event.button, 8);
-                    
-                    event.button.func_146113_a(this.mc.getSoundHandler());
-                    this.actionPerformed(event.button);
-                    if (this.equals(this.mc.currentScreen))
-                        MinecraftForge.EVENT_BUS.post(new ActionPerformedEvent.Post(this, event.button, this.buttonList));
-                }
-            }
-        }
+        super.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
+        
     }
-
 }
