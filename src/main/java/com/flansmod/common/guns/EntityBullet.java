@@ -143,7 +143,6 @@ public class EntityBullet extends EntityShootable implements IEntityAdditionalSp
 	public EntityBullet(World world, EntityLivingBase shooter, float spread, float gunDamage, BulletType type1, float speed, boolean shot, InfoType shotFrom)
 	{
 		this(world, Vec3.createVectorHelper(shooter.posX, shooter.posY + shooter.getEyeHeight(), shooter.posZ), shooter.rotationYaw, shooter.rotationPitch, shooter, spread, gunDamage, type1, speed, shotFrom);
-		System.out.println(shooter.getEyeHeight());
 
 		shotgun = shot;
 	}
