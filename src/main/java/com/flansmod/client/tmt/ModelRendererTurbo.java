@@ -2063,6 +2063,7 @@ public class ModelRendererTurbo extends ModelRenderer
 	public void render(float worldScale, boolean oldRotateOrder)
 	{
 		GL11.glPushMatrix();
+		GL11.glTranslatef(this.offsetX, this.offsetY, this.offsetZ);
 		if(glow){
 			glowOn();
 		}
@@ -2162,6 +2163,7 @@ public class ModelRendererTurbo extends ModelRenderer
 			compileDisplayList(f);
 		}
 		GL11.glPushMatrix();
+		GL11.glTranslatef(this.offsetX, this.offsetY, this.offsetZ);
 		GL11.glTranslatef(rotationPointX * f, rotationPointY * f, rotationPointZ * f);
 		if(rotateAngleY != 0.0F)
 		{
@@ -2194,6 +2196,7 @@ public class ModelRendererTurbo extends ModelRenderer
 		{
 			compileDisplayList(f);
 		}
+		GL11.glTranslatef(this.offsetX, this.offsetY, this.offsetZ);
 		if(rotateAngleX != 0.0F || rotateAngleY != 0.0F || rotateAngleZ != 0.0F)
 		{
 			GL11.glTranslatef(rotationPointX * f, rotationPointY * f, rotationPointZ * f);

@@ -88,24 +88,22 @@ public class ModelCustomArmour extends ModelBiped
 			
 			if(exp.currentPlayingAnimation != null)
 			{
-				exp.currentPlayingAnimation.copyModelAngles(RendererListener.modelPlayer.bipedHead,bipedHead);
-				exp.currentPlayingAnimation.copyModelAngles(RendererListener.modelPlayer.bipedHead,bipedHeadwear);
-				exp.currentPlayingAnimation.copyModelAngles(RendererListener.modelPlayer.bipedBody,bipedBody);
-				exp.currentPlayingAnimation.copyModelAngles(RendererListener.modelPlayer.bipedLeftArm,bipedLeftArm);
-				exp.currentPlayingAnimation.copyModelAngles(RendererListener.modelPlayer.bipedRightArm,bipedRightArm);
-				exp.currentPlayingAnimation.copyModelAngles(RendererListener.modelPlayer.bipedLeftLeg,bipedLeftLeg);
-				exp.currentPlayingAnimation.copyModelAngles(RendererListener.modelPlayer.bipedRightLeg,bipedRightLeg);
+				exp.currentPlayingAnimation.copyModel(RendererListener.modelPlayer.bipedHead,bipedHead);
+				exp.currentPlayingAnimation.copyModel(RendererListener.modelPlayer.bipedHead,bipedHeadwear);
+				exp.currentPlayingAnimation.copyModel(RendererListener.modelPlayer.bipedBody,bipedBody);
+				exp.currentPlayingAnimation.copyModel(RendererListener.modelPlayer.bipedLeftArm,bipedLeftArm);
+				exp.currentPlayingAnimation.copyModel(RendererListener.modelPlayer.bipedRightArm,bipedRightArm);
+				exp.currentPlayingAnimation.copyModel(RendererListener.modelPlayer.bipedLeftLeg,bipedLeftLeg);
+				exp.currentPlayingAnimation.copyModel(RendererListener.modelPlayer.bipedRightLeg,bipedRightLeg);
 			}
 			else
 			{
-				copyModelAngles(RendererListener.modelPlayer.bipedHead,bipedHead);
-				copyModelAngles(RendererListener.modelPlayer.bipedBody,bipedBody);
-				copyModelAngles(RendererListener.modelPlayer.bipedLeftArm,bipedLeftArm);
-				copyModelAngles(RendererListener.modelPlayer.bipedRightArm,bipedRightArm);
-				copyModelAngles(RendererListener.modelPlayer.bipedLeftLeg,bipedLeftLeg);
-				copyModelAngles(RendererListener.modelPlayer.bipedRightLeg,bipedRightLeg);
-			
-				
+				copyModel(RendererListener.modelPlayer.bipedHead,bipedHead);
+				copyModel(RendererListener.modelPlayer.bipedBody,bipedBody);
+				copyModel(RendererListener.modelPlayer.bipedLeftArm,bipedLeftArm);
+				copyModel(RendererListener.modelPlayer.bipedRightArm,bipedRightArm);
+				copyModel(RendererListener.modelPlayer.bipedLeftLeg,bipedLeftLeg);
+				copyModel(RendererListener.modelPlayer.bipedRightLeg,bipedRightLeg);
 			}
 		}
 		
@@ -162,6 +160,10 @@ public class ModelCustomArmour extends ModelBiped
 			mod.rotateAngleX = bodyPart.rotateAngleX;
 			mod.rotateAngleY = bodyPart.rotateAngleY;
 			mod.rotateAngleZ = bodyPart.rotateAngleZ;
+			mod.offsetX = bodyPart.offsetX;
+			mod.offsetY = bodyPart.offsetY;
+			mod.offsetZ = bodyPart.offsetZ;
+			
 			mod.render(f5);
 		}
 	}
@@ -176,7 +178,7 @@ public class ModelCustomArmour extends ModelBiped
 		}
 	}
 	
-    public void copyModelAngles(ModelRenderer source, ModelRenderer dest)
+    public void copyModel(ModelRenderer source, ModelRenderer dest)
     {
         dest.rotateAngleX = source.rotateAngleX;
         dest.rotateAngleY = source.rotateAngleY;
@@ -184,12 +186,11 @@ public class ModelCustomArmour extends ModelBiped
         dest.rotationPointX = source.rotationPointX;
         dest.rotationPointY = source.rotationPointY;
         dest.rotationPointZ = source.rotationPointZ;
-    }
-    
-    public void copyModelOffset(ModelRenderer source, ModelRenderer dest)
-    {
+        
         dest.offsetX = source.offsetX;
         dest.offsetY = source.offsetY;
         dest.offsetZ = source.offsetZ;
     }
+    
+
 }
